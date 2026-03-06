@@ -1,81 +1,379 @@
-﻿<!doctype html>
-<html>
-	<head>
-		<title>Blair Hudson ✨</title>
-		<meta http-equiv="refresh" content="0; url=http://linkedin.com/in/blairhudson" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-		<meta charset="UTF-8">
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.2.14/spectre.min.css" />
-		<script src="https://twemoji.maxcdn.com/2/twemoji.min.js?2.2.3"></script>  
-		<script>
-			window.onload = function() {
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>blairhudson.com</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+      (() => {
+        const routeRedirects = {
+          "linkedin": "https://linkedin.com/in/blairhudson",
+          "work-with-me": "https://cba.wd3.myworkdayjobs.com/en-US/CommBank_Careers/jobs?q=generative+ai&locationCountry=d903bb3fedad45039383f6de334ad4db",
+          "substack": "https://sublight.substack.com",
+          "github": "https://github.com/blairhudson/",
+          "fastapi-agents": "https://fastapi-agents.blairhudson.com",
+          "deployscience-labs": "https://deployscience.com/publications/"
+        };
 
-			  // Set the size of the rendered Emojis
-			  // This can be set to 16x16, 36x36, or 72x72
-			  twemoji.size = '72x72';
+        const current = window.location.pathname
+          .replace(/\/+$/, "")
+          .split("/")
+          .filter(Boolean)
+          .pop();
 
-			  // Parse the document body and
-			  // insert <img> tags in place of Unicode Emojis
-			  twemoji.parse(document.body);
+        if (current && routeRedirects[current.toLowerCase()]) {
+          window.location.replace(routeRedirects[current.toLowerCase()]);
+        }
+      })();
+    </script>
+    <style>
+      :root {
+        --bg: #000;
+        --fg: #fff;
+        --glow: #ffffff;
+      }
 
-			}
-		</script>
-		<style>
-			img.emoji {  
-			  // Override any img styles to ensure Emojis are displayed inline
-			  margin: 0px !important;
-			  display: inline !important;
-			  height: 1em;
-			  width: 1em;
-			  margin: 0 .05em 0 .1em;
-			  vertical-align: -0.1em;
-			}
-			.label {
-				line-height: 0.85;
-			}
-			.disabled {
-		        pointer-events: none;
-		        cursor: default;
-		        opacity: 0.6;
-		    }
-		</style>
-	</head>
-	<body class="empty" style="display:none">
-		<div style="font-size:medium;max-width:400px;margin:0 auto;line-height: ">
-			<p><span style="font-size:xx-large;">👨🏻‍💻</span><br/><b>Blair Hudson</b></p>
+      * {
+        box-sizing: border-box;
+      }
 
-			<span class="label">Current</span>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
 
-			<p>🏦 Data Scientist at <a href="http://macquarie.com">@MacquarieBank</a><br>🌟 Sydney Community Lead at <a href="http://d4d.sydney/meetup">@Data4Democracy</a><br>🏛 Data Science Chief at <a href="http://govhack.org">@GovHackAU</a></p>
+      body {
+        background:
+          radial-gradient(circle at 10% 10%, #111 0 0) fixed,
+          radial-gradient(circle at 85% 25%, #0d0d0d 0 0),
+          var(--bg);
+        color: var(--fg);
+        font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        text-transform: lowercase;
+        padding: 2rem 1.25rem;
+        text-align: left;
+      }
 
-			<span class="label">Previous</span>
+      #app {
+        width: min(92vw, 640px);
+        margin: 0;
+        position: relative;
+        animation: rise 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
 
-			<p>🏛 Partnerships Chief at <a href="http://govhack.org">@GovHackAU</a><br>🌶 Data Scientist at <a href="http://pepper.com.au">@PepperMoney</a><br>📊 Analytics Consultant at <a href="http://ey.com/au">@EY_Australia</a><br>🎓 B. Info Tech at <a href="http://mq.edu.au">@Macquarie_Uni</a></p>
+      #app::before {
+        content: "";
+        position: absolute;
+        inset: 0 -0.5rem;
+        border: 1px solid #252525;
+        pointer-events: none;
+        opacity: 0.5;
+      }
 
-			<span class="label">Talks</span>
+      h1 {
+        margin: 0 0 2rem;
+        font-size: clamp(1.8rem, 8vw, 3rem);
+        font-weight: 700;
+        letter-spacing: 0.025em;
+        text-shadow: 0 0 0.3rem rgba(255, 255, 255, 0.3);
+      }
 
-			<p>💡 Chief Data Analytics Officer Forum <a href="https://web.archive.org/web/20170522112255/http://chiefdataanalyticsofficersydney.com/seminar/delivering-innovation/">(Sydney '17)</a><br>💁🏻‍♂️ CX Innovation & Tech Fest <a href="https://web.archive.org/web/20170522112630/http://www.techfestconf.com/customer-experience/aus/speakers/">(Melbourne '17)</a></p>
-			
-			<span class="label">Projects</span>
+      .page-subtitle {
+        margin: -1.25rem 0 2rem;
+        max-width: 70ch;
+        opacity: 0.82;
+        font-size: clamp(0.9rem, 2.8vw, 1.1rem);
+        letter-spacing: 0.02em;
+      }
 
-			<p>📝 Blogging at <a href="http://blairhudson.github.io/blog">The Data Everythingist</a><br>🦄 Author of <a href="http://blairhudson.github.io/learningml">@Learning_ML</a><br>🃏 Creator of <a href="https://web.archive.org/web/20161105231710/http://www.analyticsstrategy.cards/">AnalyticsStrategy.Cards</a><!-- &nbsp;<span class="label label-primary">&delta;</span> --><!-- <br>🎉 Contributor at <a href="https://github.com/DataSciParty/Party-Bus">@DataSciParty</a>&nbsp;<span class="label label-primary">&alpha;</span> --><!-- <br>📝 Host of <a href="https://medium.com/LocallyOptimal">@LocallyOptimal</a>&nbsp;<span class="label label-primary">&alpha;</span> --></p>
+      .link-list {
+        display: grid;
+        gap: 1rem;
+      }
 
-			<!-- <p><small><span class="label">&alpha;</span>pre-launch&nbsp;<span class="label">&beta;</span>post-launch&nbsp;<span class="label">&delta;</span>retired</small></p> -->
+      .link-item {
+        display: block;
+        position: relative;
+        padding: 1rem 1.25rem 1rem 2.8rem;
+        line-height: 1.15;
+        border: 2px solid var(--fg);
+        color: var(--fg);
+        text-decoration: none;
+        font-size: clamp(1.4rem, 7vw, 2.6rem);
+        font-weight: 700;
+        letter-spacing: 0.015em;
+        border-radius: 0.45rem;
+        transition: background 150ms ease, color 150ms ease, transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+        background: #000000;
+        box-shadow: 0 0 0 1px #111 inset, 0 0 0 1px rgba(255, 255, 255, 0.08);
+        animation: dropIn 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        animation-fill-mode: both;
+      }
 
-			<span class="label">Connecting</span>
+      .link-item::before {
+        content: ">";
+        position: absolute;
+        left: 0.95rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        opacity: 1;
+        font-size: 0.9em;
+        transition: color 120ms ease, opacity 120ms ease;
+        color: #fff;
+      }
 
-			<p>🐦 You can tweet me <a href="http://twitter.com/blairhudson">@blairhudson</a><br>👔 or connect with me on <a href="http://linkedin.com/in/blairhudson">LinkedIn</a></p>
+      .link-item:hover::before {
+        content: ">";
+        opacity: 0.8;
+      }
 
-			<p>❤️</p>
-		</div>
-		<script>
-			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-			})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      .link-item.selected::before {
+        content: ">";
+        opacity: 1;
+        color: #000;
+      }
 
-			ga('create', 'UA-99092313-1', 'auto');
-			ga('send', 'pageview');
-		</script>
-	</body>
+      .link-item.primary {
+        font-size: clamp(2rem, 8.5vw, 3rem);
+        box-shadow: 0 0 0 2px #fff inset;
+      }
+
+      .link-item:hover {
+        background: #111;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25), 0 0 1.2rem rgba(255, 255, 255, 0.12) inset;
+        transform: translateY(-1px);
+      }
+
+      .link-item:focus-visible {
+        outline: 3px solid #fff;
+        outline-offset: 4px;
+        transform: translateY(-1px);
+      }
+
+      .link-item.selected {
+        background: #fff;
+        color: #000;
+        box-shadow: 0 0 0 1px #fff inset, 0 0 1.8rem rgba(255, 255, 255, 0.3);
+        animation: pulse 900ms infinite;
+      }
+
+      .link-copy {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.22rem;
+        width: 100%;
+      }
+
+      .link-item .label {
+        display: block;
+        text-transform: lowercase;
+        line-height: 1.05;
+      }
+
+      .link-item .link-subtitle {
+        font-size: clamp(0.8rem, 2.8vw, 1.1rem);
+        font-weight: 400;
+        opacity: 0.78;
+        line-height: 1.3;
+      }
+
+      @media (max-width: 767px) {
+        .link-item.primary {
+          font-size: clamp(1.75rem, 8vw, 2.6rem);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #app,
+        .link-item,
+        .link-item.selected {
+          animation: none;
+        }
+
+        .link-item,
+        .link-item:hover,
+        .link-item:focus-visible {
+          transition: none;
+        }
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes dropIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-1px);
+        }
+        100% {
+          transform: translateY(0);
+        }
+      }
+
+      @media (min-width: 768px) {
+        .link-item:focus-visible {
+          outline-color: #f5f5f5;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+
+      <script>
+      const app = Vue.createApp({
+        setup() {
+          const { ref, onMounted, onUnmounted } = Vue;
+
+          const links = [
+            {
+              label: "linkedin",
+              subtitle: "connect with me for career and startup advice",
+              href: "https://linkedin.com/in/blairhudson",
+              className: "primary"
+            },
+            {
+              label: "work with me",
+              subtitle: "connect on linkedin to discuss",
+              href: "https://cba.wd3.myworkdayjobs.com/en-US/CommBank_Careers/jobs?q=generative+ai&locationCountry=d903bb3fedad45039383f6de334ad4db",
+              className: ""
+            },
+            {
+              label: "substack",
+              subtitle: "my thoughts on AI, work, and the future in Australia",
+              href: "https://sublight.substack.com",
+              className: ""
+            },
+            {
+              label: "deployscience labs",
+              subtitle: "ai research",
+              href: "https://deployscience.com/publications/",
+              className: ""
+            },
+            {
+              label: "github",
+              subtitle: "projects and code",
+              href: "https://github.com/blairhudson/",
+              className: ""
+            },
+            {
+              label: "fastapi-agents",
+              subtitle: "build and deploy with agents",
+              href: "https://fastapi-agents.blairhudson.com",
+              className: ""
+            },
+          ];
+
+          const activeIndex = ref(-1);
+
+          const setFocus = (index) => {
+            const linkEls = document.querySelectorAll(".link-item");
+            const target = linkEls[index];
+            if (target) target.focus();
+            activeIndex.value = index;
+          };
+
+          const focusAdjacent = (event, index, direction) => {
+            event.preventDefault();
+            const nextIndex = (index + direction + links.length) % links.length;
+            setFocus(nextIndex);
+          };
+
+          const openFocused = (event, index) => {
+            event.preventDefault();
+            const href = activeIndex.value >= 0 ? links[activeIndex.value]?.href : links[index]?.href;
+            if (href) window.open(href, "_blank", "noopener,noreferrer");
+          };
+
+          const activate = (index) => {
+            activeIndex.value = index;
+          };
+
+          const handleGlobalArrow = (event) => {
+            const arrows = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+            if (!arrows.includes(event.key)) return;
+
+            event.preventDefault();
+
+            if (activeIndex.value === -1) {
+              setFocus(0);
+              return;
+            }
+
+            const direction = event.key === "ArrowUp" || event.key === "ArrowLeft" ? -1 : 1;
+            focusAdjacent(event, activeIndex.value, direction);
+          };
+
+          onMounted(() => {
+            window.addEventListener("keydown", handleGlobalArrow);
+          });
+
+          onUnmounted(() => {
+            window.removeEventListener("keydown", handleGlobalArrow);
+          });
+
+          return { links, activeIndex, focusAdjacent, openFocused, activate };
+        },
+        template: `
+          <main>
+            <h1>blairhudson.com</h1>
+            <p class="page-subtitle">australian ai and software engineering leader</p>
+            <nav class="link-list" aria-label="connect links">
+              <a
+                v-for="(link, index) in links"
+                :key="link.href"
+                :href="link.href"
+                :class="['link-item', link.className, { selected: activeIndex === index }]"
+                :tabindex="0"
+                :style="{ animationDelay: index * 60 + 'ms' }"
+                @focus="activate(index)"
+                @click.prevent="openFocused($event, index)"
+                target="_blank"
+                rel="noopener noreferrer"
+                >
+                <span class="link-copy">
+                  <span class="label">{{ link.label }}</span>
+                  <span class="link-subtitle">{{ link.subtitle }}</span>
+                </span>
+              </a>
+            </nav>
+          </main>
+        `
+      });
+
+      app.mount("#app");
+    </script>
+  </body>
 </html>

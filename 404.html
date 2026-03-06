@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>redirecting…</title>
+    <script>
+      (() => {
+        const routeRedirects = {
+          "linkedin": "https://linkedin.com/in/blairhudson",
+          "work-with-me": "https://cba.wd3.myworkdayjobs.com/en-US/CommBank_Careers/jobs?q=generative+ai&locationCountry=d903bb3fedad45039383f6de334ad4db",
+          "substack": "https://sublight.substack.com",
+          "github": "https://github.com/blairhudson/",
+          "fastapi-agents": "https://fastapi-agents.blairhudson.com",
+          "deployscience-labs": "https://deployscience.com/publications/"
+        };
+
+        const current = window.location.pathname
+          .replace(/\/+$/, "")
+          .split("/")
+          .filter(Boolean)
+          .pop();
+
+        const target = current && routeRedirects[current.toLowerCase()];
+        if (target) {
+          window.location.replace(target);
+          return;
+        }
+
+        window.location.replace("/");
+      })();
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
