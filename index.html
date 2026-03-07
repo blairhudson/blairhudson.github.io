@@ -585,7 +585,7 @@
         }
 
         .shell {
-          min-height: calc(100vh - 1.5rem);
+          min-height: calc(100dvh - 1.5rem);
         }
 
         .terminal-grid {
@@ -600,7 +600,7 @@
         .console-column {
           position: fixed;
           right: 0.75rem;
-          bottom: 0.75rem;
+          bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
           left: 0.75rem;
           z-index: 4;
           border: 1px solid rgba(255, 255, 255, 0.08);
@@ -615,9 +615,9 @@
 
         .console-column .console {
           grid-template-rows: auto 1fr auto auto;
-          max-height: 8.25rem;
+          height: 8.25rem;
           overflow: hidden;
-          transition: max-height 240ms ease;
+          transition: height 240ms ease;
           position: relative;
         }
 
@@ -626,7 +626,7 @@
         }
 
         .console-column.expanded .console {
-          max-height: calc(100vh - 5rem);
+          height: calc(100dvh - 5rem - env(safe-area-inset-bottom, 0px));
         }
 
         .console-column:not(.expanded) .console-output {
@@ -646,7 +646,7 @@
           display: grid;
           position: fixed;
           right: 0.9rem;
-          bottom: 0.85rem;
+          bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
           left: 0.9rem;
           margin: 0;
           z-index: 5;
@@ -659,7 +659,7 @@
         .console-column.expanded .prompt-row {
           position: fixed;
           right: 0.9rem;
-          bottom: 0.85rem;
+          bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
           left: 0.9rem;
           margin: 0;
           z-index: 5;
