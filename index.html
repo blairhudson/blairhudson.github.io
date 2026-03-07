@@ -10,7 +10,7 @@
     />
     <meta
       name="description"
-      content="Blair Hudson — Australian AI and software engineering leader. Career, startup, and AI opportunities, plus links to LinkedIn, Workday roles, Substack, GitHub, FastAPI Agents, and DeployScience publications."
+      content="Blair Hudson - Australian AI and software engineering leader. Career, startup, and AI opportunities, plus links to LinkedIn, Workday roles, Substack, GitHub, FastAPI Agents, and DeployScience publications."
     />
     <meta
       name="keywords"
@@ -77,6 +77,7 @@
         "description": "A concise index of links for career and startup engagement, AI commentary, engineering work, and research."
       }
     </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -87,12 +88,19 @@
     <script>
       (() => {
         const routeRedirects = {
-          "linkedin": "https://linkedin.com/in/blairhudson",
+          linkedin: "https://linkedin.com/in/blairhudson",
+          contact: "https://linkedin.com/in/blairhudson",
           "work-with-me": "https://cba.wd3.myworkdayjobs.com/en-US/CommBank_Careers/jobs?q=generative+ai&locationCountry=d903bb3fedad45039383f6de334ad4db",
-          "substack": "https://sublight.substack.com",
-          "github": "https://github.com/blairhudson/",
+          work: "https://cba.wd3.myworkdayjobs.com/en-US/CommBank_Careers/jobs?q=generative+ai&locationCountry=d903bb3fedad45039383f6de334ad4db",
+          career: "https://cba.wd3.myworkdayjobs.com/en-US/CommBank_Careers/jobs?q=generative+ai&locationCountry=d903bb3fedad45039383f6de334ad4db",
+          substack: "https://sublight.substack.com",
+          writing: "https://sublight.substack.com",
+          github: "https://github.com/blairhudson/",
+          code: "https://github.com/blairhudson/",
           "fastapi-agents": "https://fastapi-agents.blairhudson.com",
-          "deployscience-labs": "https://deployscience.com/publications/"
+          future: "https://fastapi-agents.blairhudson.com",
+          "deployscience-labs": "https://deployscience.com/publications/",
+          research: "https://deployscience.com/publications/"
         };
 
         const current = window.location.pathname
@@ -108,9 +116,14 @@
     </script>
     <style>
       :root {
-        --bg: #000;
-        --fg: #fff;
-        --glow: #ffffff;
+        --bg: #020304;
+        --text: #f7f8fb;
+        --text-dim: rgba(247, 248, 251, 0.76);
+        --text-subtle: rgba(247, 248, 251, 0.5);
+        --panel: rgba(6, 8, 12, 0.88);
+        --panel-soft: rgba(10, 14, 20, 0.72);
+        --line: rgba(255, 255, 255, 0.08);
+        --line-strong: rgba(255, 255, 255, 0.18);
       }
 
       * {
@@ -124,200 +137,535 @@
       }
 
       body {
+        min-height: 100vh;
+        overflow-x: hidden;
         background:
-          radial-gradient(circle at 10% 10%, #111 0 0) fixed,
-          radial-gradient(circle at 85% 25%, #0d0d0d 0 0),
-          var(--bg);
-        color: var(--fg);
+          radial-gradient(circle at 14% 16%, rgba(255, 255, 255, 0.1), transparent 26%),
+          radial-gradient(circle at 84% 20%, rgba(255, 255, 255, 0.05), transparent 24%),
+          linear-gradient(155deg, #010102 0%, #03050a 52%, #010203 100%);
+        color: var(--text);
         font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         text-transform: lowercase;
-        padding: 2rem 1.25rem;
-        text-align: left;
-      }
-
-      #app {
-        width: min(92vw, 640px);
-        margin: 0;
-        position: relative;
-        animation: rise 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
-      }
-
-      #app::before {
-        content: "";
-        position: absolute;
-        inset: 0 -0.5rem;
-        border: 1px solid #252525;
-        pointer-events: none;
-        opacity: 0.5;
-      }
-
-      h1 {
-        margin: 0 0 2rem;
-        font-size: clamp(1.8rem, 8vw, 3rem);
-        font-weight: 700;
-        letter-spacing: 0.025em;
-        text-shadow: 0 0 0.3rem rgba(255, 255, 255, 0.3);
-      }
-
-      .page-subtitle {
-        margin: -1.25rem 0 2rem;
-        max-width: 70ch;
-        opacity: 0.82;
-        font-size: clamp(0.9rem, 2.8vw, 1.1rem);
         letter-spacing: 0.02em;
       }
 
-      .link-list {
-        display: grid;
-        gap: 1rem;
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+        background-size: 72px 72px;
+        mask-image: radial-gradient(circle at center, black 36%, transparent 100%);
+        opacity: 0.35;
+        pointer-events: none;
       }
 
-      .link-item {
-        display: block;
-        position: relative;
-        padding: 1rem 1.25rem 1rem 2.8rem;
-        line-height: 1.15;
-        border: 2px solid var(--fg);
-        color: var(--fg);
-        text-decoration: none;
-        font-size: clamp(1.4rem, 7vw, 2.6rem);
-        font-weight: 700;
-        letter-spacing: 0.015em;
-        border-radius: 0.45rem;
-        transition: background 150ms ease, color 150ms ease, transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
-        background: #000000;
-        box-shadow: 0 0 0 1px #111 inset, 0 0 0 1px rgba(255, 255, 255, 0.08);
-        animation: dropIn 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
-        animation-fill-mode: both;
-      }
-
-      .link-item::before {
-        content: ">";
-        position: absolute;
-        left: 0.95rem;
-        top: 50%;
-        transform: translateY(-50%);
-        font-weight: 700;
-        letter-spacing: 0.2em;
-        opacity: 1;
-        font-size: 0.9em;
-        transition: color 120ms ease, opacity 120ms ease;
-        color: #fff;
-      }
-
-      .link-item:hover::before {
-        content: ">";
-        opacity: 0.8;
-      }
-
-      .link-item.selected::before {
-        content: ">";
-        opacity: 1;
-        color: #000;
-      }
-
-      .link-item.primary {
-        font-size: clamp(2rem, 8.5vw, 3rem);
-        box-shadow: 0 0 0 2px #fff inset;
-      }
-
-      .link-item:hover {
-        background: #111;
-        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25), 0 0 1.2rem rgba(255, 255, 255, 0.12) inset;
-        transform: translateY(-1px);
-      }
-
-      .link-item:focus-visible {
-        outline: 3px solid #fff;
-        outline-offset: 4px;
-        transform: translateY(-1px);
-      }
-
-      .link-item.selected {
-        background: #fff;
-        color: #000;
-        box-shadow: 0 0 0 1px #fff inset, 0 0 1.8rem rgba(255, 255, 255, 0.3);
-        animation: pulse 900ms infinite;
-      }
-
-      .link-copy {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.22rem;
+      .field-canvas {
+        position: fixed;
+        inset: 0;
         width: 100%;
+        height: 100%;
+        pointer-events: none;
+        opacity: 0.94;
+        z-index: 0;
       }
 
-      .link-item .label {
+      #app {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        padding: clamp(0.8rem, 2vw, 1.25rem);
+      }
+
+      .boot-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 5;
+        display: grid;
+        align-content: end;
+        gap: 1.1rem;
+        padding: clamp(1.35rem, 4vw, 2.4rem);
+        background:
+          radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.05), transparent 30%),
+          linear-gradient(180deg, rgba(1, 2, 4, 0.98), rgba(2, 4, 7, 0.94));
+        transition: opacity 420ms ease, visibility 420ms ease;
+      }
+
+      .boot-screen.done {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .boot-mark {
+        margin: 0;
+        color: var(--text-subtle);
+        font-size: 0.82rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .boot-log {
+        display: grid;
+        gap: 0.35rem;
+      }
+
+      .boot-log p {
+        margin: 0;
+        color: var(--text-dim);
+        font-size: clamp(0.95rem, 2.4vw, 1.05rem);
+      }
+
+      .boot-bar {
+        width: min(100%, 34rem);
+        height: 0.45rem;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+      }
+
+      .boot-bar span {
         display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.95));
+        box-shadow: 0 0 18px rgba(255, 255, 255, 0.24);
+        transition: width 220ms ease;
+      }
+
+      .shell {
+        position: relative;
+        width: min(100%, 92rem);
+        min-height: calc(100vh - clamp(1.6rem, 4vw, 2.5rem));
+        margin: 0 auto;
+        display: grid;
+        grid-template-rows: auto auto auto 1fr;
+        gap: 0;
+        opacity: 0;
+        transform: translateY(1.25rem);
+        transition: opacity 520ms ease, transform 520ms ease;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+          var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 1.4rem;
+        overflow: hidden;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.06),
+          0 32px 72px rgba(0, 0, 0, 0.42);
+      }
+
+      .shell.online {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .shell.idle .module-list {
+        opacity: 0.82;
+      }
+
+      .terminal-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.9rem 1.1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .terminal-meta,
+      .terminal-path {
+        margin: 0;
+        font-size: 0.76rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text-subtle);
+      }
+
+      .terminal-path {
+        color: var(--text-dim);
+      }
+
+      .terminal-intro {
+        display: grid;
+        gap: 0.6rem;
+        padding: 1.3rem 1.2rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      h1 {
+        margin: 0 0 0.9rem;
+        font-size: clamp(1.9rem, 6vw, 3.5rem);
+        line-height: 1;
+        letter-spacing: 0.05em;
+        font-weight: 800;
+      }
+
+      .page-subtitle {
+        margin: 0;
+        max-width: 48rem;
+        color: var(--text-dim);
+        font-size: clamp(0.92rem, 2vw, 1rem);
+        line-height: 1.7;
+      }
+
+      .intro-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.9rem 1.2rem;
+        align-items: center;
+      }
+
+      .intro-label,
+      .signal-label,
+      .module-label {
+        margin: 0;
+        color: var(--text-subtle);
+        font-size: 0.72rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .intro-value {
+        margin: 0;
+        color: var(--text-subtle);
+        font-size: 0.88rem;
+        line-height: 1.5;
+      }
+
+      .terminal-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.8fr);
+        min-height: 0;
+      }
+
+      .console-column {
+        display: grid;
+        grid-template-rows: 1fr;
+        min-height: 0;
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .console,
+      .module-panel,
+      .signal-panel {
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+          var(--panel-soft);
+      }
+
+      .console {
+        display: grid;
+        grid-template-rows: auto 1fr auto auto;
+        min-height: 0;
+        height: 100%;
+      }
+
+      .console-head {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 1rem 1.2rem 0.85rem;
+      }
+
+      .console-output {
+        min-height: 0;
+        padding: 0 1.2rem 1rem;
+        display: grid;
+        align-content: start;
+        gap: 0.42rem;
+        overflow: auto;
+      }
+
+      .console-line {
+        margin: 0;
+        color: var(--text-dim);
+        font-size: 0.88rem;
+        line-height: 1.6;
+        word-break: break-word;
+      }
+
+      .prompt-row {
+        display: grid;
+        grid-template-columns: auto auto minmax(0, 1fr);
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0 1.2rem 0.9rem;
+        padding: 0.9rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 0.9rem;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .prompt-path,
+      .prompt-mark {
+        color: var(--text);
+        font-size: 0.9rem;
+      }
+
+      .command-input {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: var(--text);
+        font: inherit;
+        font-size: 0.92rem;
         text-transform: lowercase;
-        line-height: 1.05;
+        outline: none;
       }
 
-      .link-item .link-subtitle {
-        font-size: clamp(0.8rem, 2.8vw, 1.1rem);
-        font-weight: 400;
-        opacity: 0.78;
-        line-height: 1.3;
+      .command-input::placeholder {
+        color: var(--text-subtle);
+        opacity: 1;
       }
 
-      @media (max-width: 767px) {
-        .link-item.primary {
-          font-size: clamp(1.75rem, 8vw, 2.6rem);
+      .module-column {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        min-height: 0;
+      }
+
+      @media (min-width: 641px) {
+        .terminal-grid {
+          min-height: calc(100vh - 11.5rem);
+        }
+
+        .console-column {
+          min-height: 100%;
+        }
+
+        .console-output {
+          align-content: end;
+        }
+      }
+
+      .module-panel,
+      .signal-panel {
+        padding: 1rem 1.1rem;
+      }
+
+      .module-list {
+        display: grid;
+        gap: 0;
+        padding-bottom: 0.3rem;
+        transition: opacity 260ms ease;
+      }
+
+      .module-item {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 0.75rem;
+        padding: 0.9rem 1.1rem;
+        color: var(--text);
+        text-decoration: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.04);
+        transition: background 180ms ease, color 180ms ease;
+      }
+
+      .module-item:first-child {
+        border-top: 0;
+      }
+
+      .module-item:hover,
+      .module-item:focus-visible {
+        background: rgba(255, 255, 255, 0.04);
+        outline: none;
+      }
+
+      .module-item.selected {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .module-index {
+        color: var(--text-subtle);
+        font-size: 0.76rem;
+        line-height: 1.4;
+      }
+
+      .module-copy {
+        min-width: 0;
+      }
+
+      .module-name {
+        display: block;
+        font-size: 1rem;
+        line-height: 1.4;
+      }
+
+      .module-subtitle {
+        display: block;
+        margin-top: 0.22rem;
+        color: var(--text-subtle);
+        font-size: 0.78rem;
+        line-height: 1.55;
+      }
+
+      .signal-panel {
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .signal-body {
+        margin: 0;
+        color: var(--text-dim);
+        font-size: 0.86rem;
+        line-height: 1.7;
+      }
+
+      .signal-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin-top: 0.95rem;
+      }
+
+      .signal-tag {
+        display: inline-flex;
+        padding: 0.38rem 0.58rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-subtle);
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      @media (max-width: 900px) {
+        .terminal-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .module-column {
+          order: 1;
+        }
+
+        .console-column {
+          order: 2;
+          border-right: 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+      }
+
+      @media (max-width: 640px) {
+        #app {
+          padding: 1rem 0.9rem 1.4rem;
+        }
+
+        .boot-screen {
+          padding: 1.25rem 0.9rem;
+        }
+
+        .terminal-bar,
+        .terminal-intro,
+        .console-head,
+        .console-output,
+        .module-panel,
+        .signal-panel {
+          padding-left: 0.9rem;
+          padding-right: 0.9rem;
+        }
+
+        .prompt-row {
+          margin-left: 0.9rem;
+          margin-right: 0.9rem;
+        }
+
+        .shell {
+          min-height: calc(100vh - 1.5rem);
+        }
+
+        .terminal-grid {
+          display: block;
+          padding-bottom: 4.75rem;
+        }
+
+        .module-column {
+          min-height: auto;
+        }
+
+        .console-column {
+          position: fixed;
+          right: 0.75rem;
+          bottom: 0.75rem;
+          left: 0.75rem;
+          z-index: 4;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-bottom: 0;
+          border-radius: 1rem 1rem 0 0;
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+            var(--panel);
+          box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.42);
+          transition: top 240ms ease;
+        }
+
+        .console-column .console {
+          grid-template-rows: auto 1fr auto auto;
+          max-height: 8.25rem;
+          overflow: hidden;
+          transition: max-height 240ms ease;
+          position: relative;
+        }
+
+        .console-column.expanded {
+          top: 4.25rem;
+        }
+
+        .console-column.expanded .console {
+          max-height: calc(100vh - 5rem);
+        }
+
+        .console-column:not(.expanded) .console-output {
+          display: none;
+        }
+
+        .console-column.expanded .console-output,
+        .console-column.expanded .prompt-row {
+          display: grid;
+        }
+
+        .console-column.expanded .prompt-row {
+          display: grid;
+        }
+
+        .console-column:not(.expanded) .prompt-row {
+          display: grid;
+          position: fixed;
+          right: 0.9rem;
+          bottom: 0.85rem;
+          left: 0.9rem;
+          margin: 0;
+          z-index: 5;
+        }
+
+        .console-column.expanded .console-output {
+          padding-bottom: 5.75rem;
+        }
+
+        .console-column.expanded .prompt-row {
+          position: fixed;
+          right: 0.9rem;
+          bottom: 0.85rem;
+          left: 0.9rem;
+          margin: 0;
+          z-index: 5;
+        }
+
+        .console-column.expanded .console-head {
+          position: static;
         }
       }
 
       @media (prefers-reduced-motion: reduce) {
-        #app,
-        .link-item,
-        .link-item.selected {
-          animation: none;
-        }
-
-        .link-item,
-        .link-item:hover,
-        .link-item:focus-visible {
+        .boot-screen,
+        .shell,
+        .module-item {
           transition: none;
-        }
-      }
-
-      @keyframes rise {
-        from {
-          opacity: 0;
-          transform: translateY(8px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes dropIn {
-        from {
-          opacity: 0;
-          transform: translateY(6px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes pulse {
-        0% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-1px);
-        }
-        100% {
-          transform: translateY(0);
-        }
-      }
-
-      @media (min-width: 768px) {
-        .link-item:focus-visible {
-          outline-color: #f5f5f5;
         }
       }
     </style>
@@ -325,124 +673,898 @@
   <body>
     <div id="app"></div>
 
-      <script>
+    <script>
       const app = Vue.createApp({
         setup() {
-          const { ref, onMounted, onUnmounted } = Vue;
+          const { ref, computed, nextTick, onMounted, onUnmounted } = Vue;
 
           const links = [
             {
+              key: "linkedin",
               label: "linkedin",
               subtitle: "connect with me for career and startup advice",
               href: "https://linkedin.com/in/blairhudson",
               className: "primary"
             },
             {
+              key: "work-with-me",
               label: "work with me",
               subtitle: "connect on linkedin to discuss",
               href: "https://cba.wd3.myworkdayjobs.com/en-US/CommBank_Careers/jobs?q=generative+ai&locationCountry=d903bb3fedad45039383f6de334ad4db",
               className: ""
             },
             {
+              key: "substack",
               label: "substack",
-              subtitle: "my thoughts on AI, work, and the future in Australia",
+              subtitle: "my thoughts on ai, work, and the future in australia",
               href: "https://sublight.substack.com",
               className: ""
             },
             {
+              key: "deployscience-labs",
               label: "deployscience labs",
               subtitle: "ai research",
               href: "https://deployscience.com/publications/",
               className: ""
             },
             {
+              key: "github",
               label: "github",
               subtitle: "projects and code",
               href: "https://github.com/blairhudson/",
               className: ""
             },
             {
+              key: "fastapi-agents",
               label: "fastapi-agents",
               subtitle: "build and deploy with agents",
               href: "https://fastapi-agents.blairhudson.com",
               className: ""
-            },
+            }
           ];
 
+          const signalCards = {
+            default: {
+              title: "",
+              body: "",
+              tags: []
+            },
+            contact: {
+              title: "contact vector",
+              body: "linkedin is the fastest route for career and startup conversations.",
+              tags: ["linkedin", "contact", "open linkedin"]
+            },
+            career: {
+              title: "career vector",
+              body: "work with me points at current commbank opportunities. connect on linkedin first if context helps.",
+              tags: ["career", "work", "open work"]
+            },
+            writing: {
+              title: "writing vector",
+              body: "substack carries the essay stream: ai, work, and the future in australia.",
+              tags: ["substack", "writing", "open substack"]
+            },
+            research: {
+              title: "research signal",
+              body: "deployscience labs is the research layer. this one is meant to feel discovered.",
+              tags: ["research", "deployscience", "open research"]
+            },
+            code: {
+              title: "code signal",
+              body: "github is the visible code surface. experiments and production traces live there.",
+              tags: ["github", "code", "open github"]
+            },
+            future: {
+              title: "future signal",
+              body: "fastapi-agents is the systems track: agents, deployment, and applied infrastructure.",
+              tags: ["future", "fastapi", "open future"]
+            }
+          };
+
+          const bootSequence = [
+            "initializing blairos",
+            "mapping career vector",
+            "hydrating research graph",
+            "loading writing archive",
+            "resolving production systems",
+            "system online"
+          ];
+
+          const thoughtPool = [
+            "agents",
+            "inference economics",
+            "model distillation",
+            "local models",
+            "ai infra",
+            "human-ai interfaces",
+            "applied research",
+            "production systems"
+          ];
+
+          const fieldRef = ref(null);
+          const commandField = ref(null);
           const activeIndex = ref(-1);
+          const commandMode = ref(false);
+          const commandInput = ref("");
+          const terminalLines = ref([]);
+          const bootStep = ref(0);
+          const bootDone = ref(false);
+          const idleMode = ref(false);
+          const revealedSignal = ref("");
+          const mobileTerminalExpanded = ref(false);
 
-          const setFocus = (index) => {
-            const linkEls = document.querySelectorAll(".link-item");
-            const target = linkEls[index];
-            if (target) target.focus();
-            activeIndex.value = index;
-          };
+          const dailySeed = Number(new Date().toISOString().slice(0, 10).replace(/-/g, ""));
 
-          const focusAdjacent = (event, index, direction) => {
-            event.preventDefault();
-            const nextIndex = (index + direction + links.length) % links.length;
-            setFocus(nextIndex);
-          };
+          function seededRandom(seed) {
+            return function () {
+              seed = Math.sin(seed) * 10000;
+              return seed - Math.floor(seed);
+            };
+          }
 
-          const openFocused = (event, index) => {
-            event.preventDefault();
-            const href = activeIndex.value >= 0 ? links[activeIndex.value]?.href : links[index]?.href;
-            if (href) window.open(href, "_blank", "noopener,noreferrer");
-          };
+          const random = seededRandom(dailySeed);
+          const dailyThought = ref(thoughtPool[Math.floor(random() * thoughtPool.length)]);
 
-          const activate = (index) => {
-            activeIndex.value = index;
-          };
+          const bootLines = computed(() => bootSequence.slice(0, bootStep.value + 1));
+          const bootFill = computed(() => `${((bootStep.value + 1) / bootSequence.length) * 100}%`);
+          const visibleTerminalLines = computed(() => terminalLines.value.slice(-10));
+          const activeLabel = computed(() => {
+            return activeIndex.value >= 0 ? links[activeIndex.value].label : "";
+          });
+          const statusText = computed(() => {
+            if (!bootDone.value) {
+              return "initializing blairos";
+            }
 
-          const handleGlobalArrow = (event) => {
-            const arrows = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-            if (!arrows.includes(event.key)) return;
+            if (commandMode.value) {
+              return "";
+            }
 
-            event.preventDefault();
+            if (idleMode.value) {
+              return "system idle // field drift expanded";
+            }
 
-            if (activeIndex.value === -1) {
-              setFocus(0);
+            if (activeLabel.value) {
+              return `selected module // ${activeLabel.value}`;
+            }
+
+            return "terminal ready // arrows navigate modules // enter opens // slash focuses input";
+          });
+
+          const activeSignal = computed(() => {
+            if (revealedSignal.value && signalCards[revealedSignal.value]) {
+              return signalCards[revealedSignal.value];
+            }
+
+            return {
+              ...signalCards.default,
+              body: ""
+            };
+          });
+
+          function print(lines) {
+            const batch = Array.isArray(lines) ? lines : [lines];
+            terminalLines.value = terminalLines.value.concat(batch.map((line) => String(line))).slice(-14);
+          }
+
+          function focusLink(index) {
+            if (index < 0 || index >= links.length) {
               return;
             }
 
-            const direction = event.key === "ArrowUp" || event.key === "ArrowLeft" ? -1 : 1;
-            focusAdjacent(event, activeIndex.value, direction);
-          };
+            activeIndex.value = index;
+            nextTick(() => {
+              const items = document.querySelectorAll(".module-item");
+              const target = items[index];
+              if (target) {
+                target.focus({ preventScroll: true });
+              }
+            });
+          }
+
+          function navigate(delta) {
+            if (activeIndex.value === -1) {
+              focusLink(delta > 0 ? 0 : links.length - 1);
+              return;
+            }
+
+            focusLink((activeIndex.value + delta + links.length) % links.length);
+          }
+
+          function openLink(index) {
+            const link = links[index];
+            if (!link) {
+              return;
+            }
+
+            window.location.assign(link.href);
+          }
+
+          function openLinkInNewTab(index) {
+            const link = links[index];
+            if (!link) {
+              return;
+            }
+
+            window.open(link.href, "_blank", "noopener");
+          }
+
+          function activateLink(index, event) {
+            if (event) {
+              event.preventDefault();
+            }
+
+            openLink(index);
+          }
+
+          function setActive(index) {
+            activeIndex.value = index;
+          }
+
+          function openCommandMode() {
+            commandMode.value = true;
+            mobileTerminalExpanded.value = true;
+            nextTick(() => {
+              if (commandField.value) {
+                commandField.value.focus();
+              }
+            });
+          }
+
+          function closeCommandMode() {
+            commandMode.value = false;
+            commandInput.value = "";
+            if (commandField.value) {
+              commandField.value.blur();
+            }
+          }
+
+          function reveal(signalName) {
+            revealedSignal.value = signalName;
+
+            const revealMap = {
+              contact: 0,
+              career: 1,
+              writing: 2,
+              research: 3,
+              code: 4,
+              future: 5
+            };
+
+            if (typeof revealMap[signalName] === "number") {
+              focusLink(revealMap[signalName]);
+            }
+          }
+
+          function resolveLinkIndex(target) {
+            const normalized = target.trim().toLowerCase();
+            const aliasMap = {
+              linkedin: 0,
+              contact: 0,
+              work: 1,
+              "work-with-me": 1,
+              career: 1,
+              substack: 2,
+              writing: 2,
+              research: 3,
+              deployscience: 3,
+              "deployscience-labs": 3,
+              github: 4,
+              code: 4,
+              future: 5,
+              fastapi: 5,
+              "fastapi-agents": 5
+            };
+
+            if (typeof aliasMap[normalized] === "number") {
+              return aliasMap[normalized];
+            }
+
+            return links.findIndex((link) => {
+              return link.key === normalized || link.label === normalized || link.label.replace(/\s+/g, "-") === normalized;
+            });
+          }
+
+          function printOpenTargets() {
+            print([
+              "open targets:",
+              ...links.map((link) => `${link.label} -> ${link.href}`)
+            ]);
+          }
+
+          function printLinkTarget(index) {
+            const link = links[index];
+            if (!link) {
+              return;
+            }
+
+            print(link.href);
+          }
+
+          function printProgramHelp(program) {
+            const helpText = {
+              help: "usage: help",
+              ls: "usage: ls [path]",
+              pwd: "usage: pwd",
+              whoami: "usage: whoami",
+              hostname: "usage: hostname",
+              clear: "usage: clear",
+              open: "usage: open [--new-tab] <target>",
+              linkedin: "usage: linkedin",
+              work: "usage: work",
+              substack: "usage: substack",
+              research: "usage: research",
+              github: "usage: github",
+              future: "usage: future",
+              contact: "usage: contact",
+              career: "usage: career",
+              writing: "usage: writing",
+              code: "usage: code"
+            };
+
+            if (helpText[program]) {
+              print(helpText[program]);
+              return true;
+            }
+
+            return false;
+          }
+
+          function runCommand(command) {
+            const value = command.trim().toLowerCase();
+            if (!value) {
+              return;
+            }
+
+            print(`> ${value}`);
+
+            const helpMatch = value.match(/^(?:\/bin\/)?([a-z-]+)\s+--help$/);
+            if (helpMatch) {
+              if (printProgramHelp(helpMatch[1])) {
+                return;
+              }
+            }
+
+            if (value === "help") {
+              print([
+                "available programs in /bin:",
+                "help  ls  pwd  whoami  hostname  clear  open",
+                "linkedin  work  substack  research  github  future  contact  career  writing  code"
+              ]);
+              return;
+            }
+
+            if (value === "ls" || value === "/bin/ls" || value.startsWith("ls ") || value.startsWith("/bin/ls ")) {
+              const path = value === "ls" || value === "/bin/ls"
+                ? "~"
+                : value.startsWith("/bin/ls ")
+                  ? value.slice("/bin/ls ".length).trim()
+                  : value.slice(3).trim();
+
+              if (path === "~" || path === "/home/blair" || path === ".") {
+                print([
+                  "links",
+                  "notes",
+                  "projects",
+                  "research",
+                  "writing"
+                ]);
+                return;
+              }
+
+              if (path === "/bin") {
+                print([
+                  "help",
+                  "ls",
+                  "pwd",
+                  "whoami",
+                  "hostname",
+                  "clear",
+                  "open",
+                  "linkedin",
+                  "work",
+                  "substack",
+                  "research",
+                  "github",
+                  "future",
+                  "contact",
+                  "career",
+                  "writing",
+                  "code"
+                ]);
+                return;
+              }
+
+              print(`ls: ${path}: no such file or directory`);
+              return;
+            }
+
+            if (value === "pwd" || value === "/bin/pwd") {
+              print("/home/blair");
+              return;
+            }
+
+            if (value === "whoami" || value === "/bin/whoami") {
+              print("blair // australian ai and software engineering leader");
+              return;
+            }
+
+            if (value === "hostname" || value === "/bin/hostname") {
+              print("blairhudson.com");
+              return;
+            }
+
+            if (value === "clear") {
+              terminalLines.value = [];
+              return;
+            }
+
+            if (value === "/bin/clear") {
+              terminalLines.value = [];
+              return;
+            }
+
+            if (value === "open" || value === "/bin/open" || value.startsWith("open ") || value.startsWith("/bin/open ")) {
+              const rawTarget = value === "open" || value === "/bin/open"
+                ? ""
+                : value.startsWith("/bin/open ")
+                  ? value.slice("/bin/open ".length).trim()
+                  : value.slice(5).trim();
+              if (!rawTarget) {
+                printOpenTargets();
+                return;
+              }
+              const newTab = rawTarget.startsWith("--new-tab ");
+              const target = newTab ? rawTarget.slice("--new-tab ".length).trim() : rawTarget;
+              const linkIndex = resolveLinkIndex(target);
+
+              if (linkIndex >= 0) {
+                if (newTab) {
+                  openLinkInNewTab(linkIndex);
+                } else {
+                  openLink(linkIndex);
+                }
+                return;
+              }
+
+              print(`open: no target named ${target}`);
+              printOpenTargets();
+              return;
+            }
+
+            if (value === "linkedin" || value === "/bin/linkedin") {
+              printLinkTarget(0);
+              return;
+            }
+
+            if (value === "work" || value === "/bin/work") {
+              printLinkTarget(1);
+              return;
+            }
+
+            if (value === "substack" || value === "/bin/substack") {
+              printLinkTarget(2);
+              return;
+            }
+
+            if (value === "github" || value === "/bin/github") {
+              printLinkTarget(4);
+              return;
+            }
+
+            if (value === "contact" || value === "/bin/contact") {
+              printLinkTarget(0);
+              return;
+            }
+
+            if (value === "career" || value === "/bin/career") {
+              printLinkTarget(1);
+              return;
+            }
+
+            if (value === "writing" || value === "/bin/writing") {
+              printLinkTarget(2);
+              return;
+            }
+
+            if (value === "research" || value === "/bin/research") {
+              printLinkTarget(3);
+              return;
+            }
+
+            if (value === "code" || value === "/bin/code") {
+              printLinkTarget(4);
+              return;
+            }
+
+            if (value === "future" || value === "/bin/future") {
+              printLinkTarget(5);
+              return;
+            }
+
+            if (value === "fastapi" || value === "fastapi-agents" || value === "/bin/fastapi" || value === "/bin/fastapi-agents") {
+              printLinkTarget(5);
+              return;
+            }
+
+            if (value === "deployscience" || value === "deployscience-labs" || value === "/bin/deployscience" || value === "/bin/deployscience-labs") {
+              printLinkTarget(3);
+              return;
+            }
+
+            print(`command not found: ${value}`);
+          }
+
+          function submitCommand() {
+            const value = commandInput.value;
+            commandInput.value = "";
+            runCommand(value);
+          }
+
+          const pointer = { x: 0, y: 0, active: false };
+          let animationFrame = 0;
+          let idleTimer = 0;
+          let bootTimers = [];
+          let context = null;
+          let particles = [];
+
+          function resetIdle() {
+            idleMode.value = false;
+            window.clearTimeout(idleTimer);
+            idleTimer = window.setTimeout(() => {
+              idleMode.value = true;
+            }, 20000);
+          }
+
+          function createParticles() {
+            const particleRandom = seededRandom(dailySeed + 99);
+            const count = window.innerWidth < 700 ? 26 : 40;
+
+            particles = Array.from({ length: count }, () => ({
+              x: particleRandom() * window.innerWidth,
+              y: particleRandom() * window.innerHeight,
+              vx: (particleRandom() - 0.5) * 0.38,
+              vy: (particleRandom() - 0.5) * 0.38,
+              size: 1.2 + particleRandom() * 2.4,
+              alpha: 0.18 + particleRandom() * 0.46
+            }));
+          }
+
+          function resizeCanvas() {
+            const canvas = fieldRef.value;
+            if (!canvas) {
+              return;
+            }
+
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            context = canvas.getContext("2d");
+            canvas.width = Math.floor(window.innerWidth * dpr);
+            canvas.height = Math.floor(window.innerHeight * dpr);
+            canvas.style.width = `${window.innerWidth}px`;
+            canvas.style.height = `${window.innerHeight}px`;
+            context.setTransform(dpr, 0, 0, dpr, 0, 0);
+            createParticles();
+          }
+
+          function drawField() {
+            const canvas = fieldRef.value;
+            if (!canvas || !context) {
+              return;
+            }
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            context.clearRect(0, 0, width, height);
+
+            const idleMultiplier = idleMode.value ? 1.45 : 1;
+
+            for (let i = 0; i < particles.length; i += 1) {
+              const particle = particles[i];
+              particle.x += particle.vx * idleMultiplier;
+              particle.y += particle.vy * idleMultiplier;
+
+              if (particle.x < -30 || particle.x > width + 30) {
+                particle.vx *= -1;
+              }
+
+              if (particle.y < -30 || particle.y > height + 30) {
+                particle.vy *= -1;
+              }
+
+              if (pointer.active) {
+                const dx = particle.x - pointer.x;
+                const dy = particle.y - pointer.y;
+                const distance = Math.hypot(dx, dy);
+
+                if (distance > 0 && distance < 140) {
+                  const force = (140 - distance) / 140;
+                  particle.x += (dx / distance) * force * 1.8;
+                  particle.y += (dy / distance) * force * 1.8;
+                }
+              }
+            }
+
+            context.lineWidth = 1;
+
+            for (let i = 0; i < particles.length; i += 1) {
+              for (let j = i + 1; j < particles.length; j += 1) {
+                const a = particles[i];
+                const b = particles[j];
+                const distance = Math.hypot(a.x - b.x, a.y - b.y);
+
+                if (distance < 130) {
+                  const alpha = (1 - distance / 130) * 0.12;
+                  context.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                  context.beginPath();
+                  context.moveTo(a.x, a.y);
+                  context.lineTo(b.x, b.y);
+                  context.stroke();
+                }
+              }
+            }
+
+            const anchors = Array.from(document.querySelectorAll(".link-item")).map((item, index) => {
+              const box = item.getBoundingClientRect();
+              return {
+                x: box.left + 28,
+                y: box.top + box.height / 2,
+                active: index === activeIndex.value
+              };
+            });
+
+            anchors.forEach((anchor) => {
+              particles.forEach((particle) => {
+                const distance = Math.hypot(anchor.x - particle.x, anchor.y - particle.y);
+
+                if (distance < 170) {
+                  const alpha = (1 - distance / 170) * (anchor.active ? 0.25 : 0.08);
+                  context.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                  context.beginPath();
+                  context.moveTo(anchor.x, anchor.y);
+                  context.lineTo(particle.x, particle.y);
+                  context.stroke();
+                }
+              });
+
+              context.fillStyle = anchor.active ? "rgba(255,255,255,0.96)" : "rgba(255,255,255,0.36)";
+              context.beginPath();
+              context.arc(anchor.x, anchor.y, anchor.active ? 3.2 : 2.2, 0, Math.PI * 2);
+              context.fill();
+            });
+
+            particles.forEach((particle) => {
+              context.fillStyle = `rgba(255, 255, 255, ${particle.alpha})`;
+              context.beginPath();
+              context.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+              context.fill();
+            });
+
+            animationFrame = window.requestAnimationFrame(drawField);
+          }
+
+          function handlePointerMove(event) {
+            pointer.x = event.clientX;
+            pointer.y = event.clientY;
+            pointer.active = true;
+            resetIdle();
+          }
+
+          function handlePointerLeave() {
+            pointer.active = false;
+          }
+
+          function handleGlobalKey(event) {
+            resetIdle();
+
+            if (!bootDone.value) {
+              return;
+            }
+
+            if (event.metaKey || event.ctrlKey || event.altKey) {
+              return;
+            }
+
+            if (commandMode.value) {
+              return;
+            }
+
+            if (event.key === "/") {
+              event.preventDefault();
+              openCommandMode();
+              return;
+            }
+
+            if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+              event.preventDefault();
+              navigate(1);
+              return;
+            }
+
+            if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+              event.preventDefault();
+              navigate(-1);
+              return;
+            }
+
+            if (event.key === "Enter" && activeIndex.value >= 0) {
+              event.preventDefault();
+              openLink(activeIndex.value);
+            }
+          }
+
+          function startBootSequence() {
+            const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            const isMobileViewport = window.innerWidth <= 640;
+
+            if (reduceMotion) {
+              bootStep.value = bootSequence.length - 1;
+              bootDone.value = true;
+              print(["system ready", "press / or type help"]);
+              if (!isMobileViewport) {
+                openCommandMode();
+              }
+              return;
+            }
+
+            bootSequence.forEach((_, index) => {
+              bootTimers.push(
+                window.setTimeout(() => {
+                  bootStep.value = index;
+                }, index * 220)
+              );
+            });
+
+            bootTimers.push(
+              window.setTimeout(() => {
+                bootDone.value = true;
+                print(["system ready"]);
+                if (!isMobileViewport) {
+                  openCommandMode();
+                }
+              }, bootSequence.length * 220 + 260)
+            );
+          }
 
           onMounted(() => {
-            window.addEventListener("keydown", handleGlobalArrow);
+            resizeCanvas();
+            drawField();
+            startBootSequence();
+            resetIdle();
+
+            window.addEventListener("resize", resizeCanvas);
+            window.addEventListener("keydown", handleGlobalKey);
+            window.addEventListener("pointermove", handlePointerMove);
+            window.addEventListener("pointerdown", resetIdle);
+            window.addEventListener("touchstart", resetIdle);
+            window.addEventListener("mouseleave", handlePointerLeave);
           });
 
           onUnmounted(() => {
-            window.removeEventListener("keydown", handleGlobalArrow);
+            window.cancelAnimationFrame(animationFrame);
+            window.clearTimeout(idleTimer);
+            bootTimers.forEach((timer) => window.clearTimeout(timer));
+            window.removeEventListener("resize", resizeCanvas);
+            window.removeEventListener("keydown", handleGlobalKey);
+            window.removeEventListener("pointermove", handlePointerMove);
+            window.removeEventListener("pointerdown", resetIdle);
+            window.removeEventListener("touchstart", resetIdle);
+            window.removeEventListener("mouseleave", handlePointerLeave);
           });
 
-          return { links, activeIndex, focusAdjacent, openFocused, activate };
+          return {
+            activeIndex,
+            activeSignal,
+            activateLink,
+            bootDone,
+            bootFill,
+            bootLines,
+            closeCommandMode,
+            commandField,
+            commandInput,
+            dailyThought,
+            fieldRef,
+            idleMode,
+            links,
+            mobileTerminalExpanded,
+            openCommandMode,
+            setActive,
+            statusText,
+            submitCommand,
+            visibleTerminalLines
+          };
         },
         template: `
-          <main>
-            <h1>blairhudson.com</h1>
-            <p class="page-subtitle">australian ai and software engineering leader</p>
-            <nav class="link-list" aria-label="connect links">
-              <a
-                v-for="(link, index) in links"
-                :key="link.href"
-                :href="link.href"
-                :class="['link-item', link.className, { selected: activeIndex === index }]"
-                :tabindex="0"
-                :style="{ animationDelay: index * 60 + 'ms' }"
-                @focus="activate(index)"
-                @click.prevent="openFocused($event, index)"
-                target="_blank"
-                rel="noopener noreferrer"
-                >
-                <span class="link-copy">
-                  <span class="label">{{ link.label }}</span>
-                  <span class="link-subtitle">{{ link.subtitle }}</span>
-                </span>
-              </a>
-            </nav>
-          </main>
+          <div class="scene">
+            <canvas ref="fieldRef" class="field-canvas" aria-hidden="true"></canvas>
+
+            <section :class="['boot-screen', { done: bootDone }]">
+              <p class="boot-mark">blairos boot</p>
+              <div class="boot-log">
+                <p v-for="line in bootLines" :key="line">{{ line }}</p>
+              </div>
+              <div class="boot-bar" aria-hidden="true">
+                <span :style="{ width: bootFill }"></span>
+              </div>
+            </section>
+
+            <main :class="['shell', { online: bootDone, idle: idleMode }]">
+              <section class="terminal-bar">
+                <p class="terminal-meta">blairos v1.0</p>
+                <p class="terminal-path">logged in as blair</p>
+              </section>
+
+              <section class="terminal-intro">
+                <div class="intro-row"></div>
+              </section>
+
+              <section class="terminal-grid">
+                <section :class="['console-column', { expanded: mobileTerminalExpanded }]">
+                  <section class="console" @click="openCommandMode">
+                    <div class="console-head">
+                    </div>
+                    <div class="console-output">
+                      <p
+                        v-for="(line, lineIndex) in visibleTerminalLines"
+                        :key="line + '-' + lineIndex"
+                        class="console-line"
+                      >
+                        {{ line }}
+                      </p>
+                    </div>
+                    <label class="prompt-row">
+                      <span class="prompt-path">blair@blairos:~</span>
+                      <span class="prompt-mark">~ %</span>
+                      <input
+                        ref="commandField"
+                        v-model="commandInput"
+                        class="command-input"
+                        type="text"
+                        autocomplete="off"
+                        autocapitalize="off"
+                        autocorrect="off"
+                        spellcheck="false"
+                        placeholder="type help"
+                        @focus="openCommandMode"
+                        @keydown.enter.prevent="submitCommand"
+                        @keydown.esc.prevent="closeCommandMode"
+                      />
+                    </label>
+                  </section>
+                </section>
+
+                <aside class="module-column">
+                  <section class="module-panel">
+                    <p class="module-label">links</p>
+                  </section>
+                  <nav class="module-list" aria-label="connect links">
+                    <a
+                      v-for="(link, index) in links"
+                      :key="link.key"
+                      :href="link.href"
+                      :class="['module-item', { selected: activeIndex === index }]"
+                      tabindex="0"
+                      @focus="setActive(index)"
+                      @click.prevent="activateLink(index, $event)"
+                    >
+                      <span class="module-index">0{{ index + 1 }}</span>
+                      <span class="module-copy">
+                        <span class="module-name">{{ link.label }}</span>
+                        <span class="module-subtitle">{{ link.subtitle }}</span>
+                      </span>
+                    </a>
+                  </nav>
+
+                  <section v-if="activeSignal.title || activeSignal.body || activeSignal.tags.length" class="signal-panel">
+                    <p class="signal-label">{{ activeSignal.title }}</p>
+                    <p class="signal-body">{{ activeSignal.body }}</p>
+                    <div v-if="activeSignal.tags.length" class="signal-tags">
+                      <span v-for="tag in activeSignal.tags" :key="tag" class="signal-tag">{{ tag }}</span>
+                    </div>
+                  </section>
+                </aside>
+              </section>
+            </main>
+          </div>
         `
       });
 
