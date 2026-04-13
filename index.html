@@ -96,6 +96,7 @@
           clawkeys: "https://github.com/blairhudson/clawkeys",
           skillcraft: "https://skillcraft.gg/",
           "skillcraft.gg": "https://skillcraft.gg/",
+          "awdl-jit": "https://blairhudson.com/awdl-jit/",
           linkedin: "https://linkedin.com/in/blairhudson",
           contact: "https://linkedin.com/in/blairhudson",
           "work-with-me": "https://cba.wd3.myworkdayjobs.com/en-US/CommBank_Careers/jobs?q=generative+ai&locationCountry=d903bb3fedad45039383f6de334ad4db",
@@ -766,6 +767,13 @@
               className: ""
             },
             {
+              key: "awdl-jit",
+              label: "awdl-jit",
+              subtitle: "launch GeForce NOW on MacOS with AWDL Control just in time",
+              href: "https://blairhudson.com/awdl-jit/",
+              className: ""
+            },
+            {
               key: "linkedin",
               label: "linkedin",
               subtitle: "connect with me for career and startup advice",
@@ -1119,12 +1127,12 @@
             revealedSignal.value = signalName;
 
             const revealMap = {
-              contact: 2,
-              career: 3,
-              writing: 4,
-              research: 5,
-              code: 6,
-              future: 7
+              contact: 3,
+              career: 4,
+              writing: 5,
+              research: 6,
+              code: 7,
+              future: 8
             };
 
             if (typeof revealMap[signalName] === "number") {
@@ -1138,21 +1146,22 @@
               clawkeys: 0,
               skillcraft: 1,
               "skillcraft.gg": 1,
-              linkedin: 2,
-              contact: 2,
-              work: 3,
-              "work-with-me": 3,
-              career: 3,
-              substack: 4,
-              writing: 4,
-              research: 5,
-              deployscience: 5,
-              "deployscience-labs": 5,
-              github: 6,
-              code: 6,
-              future: 7,
-              fastapi: 7,
-              "fastapi-agents": 7
+              "awdl-jit": 2,
+              linkedin: 3,
+              contact: 3,
+              work: 4,
+              "work-with-me": 4,
+              career: 4,
+              substack: 5,
+              writing: 5,
+              research: 6,
+              deployscience: 6,
+              "deployscience-labs": 6,
+              github: 7,
+              code: 7,
+              future: 8,
+              fastapi: 8,
+              "fastapi-agents": 8
             };
 
             if (typeof aliasMap[normalized] === "number") {
@@ -1192,6 +1201,7 @@
               clawkeys: "usage: clawkeys",
               skillcraft: "usage: skillcraft",
               "skillcraft.gg": "usage: skillcraft.gg",
+              "awdl-jit": "usage: awdl-jit",
               linkedin: "usage: linkedin",
               work: "usage: work",
               substack: "usage: substack",
@@ -1231,8 +1241,8 @@
               print([
                 "available programs in /bin:",
                 "help  ls  pwd  whoami  hostname  clear  open",
-                "clawkeys  skillcraft.gg  linkedin  work  substack  research",
-                "github  future  contact  career  writing  code"
+                "clawkeys  skillcraft.gg  awdl-jit  linkedin  work",
+                "substack  research  github  future  contact  career  writing  code"
               ]);
               return;
             }
@@ -1266,6 +1276,7 @@
                   "open",
                   "clawkeys",
                   "skillcraft.gg",
+                  "awdl-jit",
                   "linkedin",
                   "work",
                   "substack",
@@ -1338,52 +1349,52 @@
             }
 
             if (value === "linkedin" || value === "/bin/linkedin") {
-              printLinkTarget(2);
+              printLinkTarget(3);
               return;
             }
 
             if (value === "work" || value === "/bin/work") {
-              printLinkTarget(3);
+              printLinkTarget(4);
               return;
             }
 
             if (value === "substack" || value === "/bin/substack") {
-              printLinkTarget(4);
-              return;
-            }
-
-            if (value === "github" || value === "/bin/github") {
-              printLinkTarget(6);
-              return;
-            }
-
-            if (value === "contact" || value === "/bin/contact") {
-              printLinkTarget(2);
-              return;
-            }
-
-            if (value === "career" || value === "/bin/career") {
-              printLinkTarget(3);
-              return;
-            }
-
-            if (value === "writing" || value === "/bin/writing") {
-              printLinkTarget(4);
-              return;
-            }
-
-            if (value === "research" || value === "/bin/research") {
               printLinkTarget(5);
               return;
             }
 
-            if (value === "code" || value === "/bin/code") {
+            if (value === "github" || value === "/bin/github") {
+              printLinkTarget(7);
+              return;
+            }
+
+            if (value === "contact" || value === "/bin/contact") {
+              printLinkTarget(3);
+              return;
+            }
+
+            if (value === "career" || value === "/bin/career") {
+              printLinkTarget(4);
+              return;
+            }
+
+            if (value === "writing" || value === "/bin/writing") {
+              printLinkTarget(5);
+              return;
+            }
+
+            if (value === "research" || value === "/bin/research") {
               printLinkTarget(6);
               return;
             }
 
-            if (value === "future" || value === "/bin/future") {
+            if (value === "code" || value === "/bin/code") {
               printLinkTarget(7);
+              return;
+            }
+
+            if (value === "future" || value === "/bin/future") {
+              printLinkTarget(8);
               return;
             }
 
@@ -1397,13 +1408,18 @@
               return;
             }
 
+            if (value === "awdl-jit" || value === "/bin/awdl-jit") {
+              printLinkTarget(2);
+              return;
+            }
+
             if (value === "fastapi" || value === "fastapi-agents" || value === "/bin/fastapi" || value === "/bin/fastapi-agents") {
-              printLinkTarget(7);
+              printLinkTarget(8);
               return;
             }
 
             if (value === "deployscience" || value === "deployscience-labs" || value === "/bin/deployscience" || value === "/bin/deployscience-labs") {
-              printLinkTarget(5);
+              printLinkTarget(6);
               return;
             }
 
