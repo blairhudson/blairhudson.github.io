@@ -13,11 +13,11 @@
     />
     <meta
       name="description"
-      content="Blair Hudson - Australian AI and software engineering leader. Career, startup, and AI opportunities, plus links to Clawkeys, Skillcraft.gg, LinkedIn, Workday roles, Substack, GitHub, FastAPI Agents, and DeployScience publications."
+      content="Blair Hudson - Australian AI and software engineering leader. Career, startup, and AI opportunities, plus links to Clawkeys, Skillcraft.gg, LinkedIn, Workday roles, Substack, GitHub, FastAPI Agents, sbx-agents, and DeployScience publications."
     />
     <meta
       name="keywords"
-      content="Blair Hudson, AI, artificial intelligence, software engineering, software engineering leader, startup advice, career advice, commbank, workday jobs, Clawkeys, Skillcraft, Skillcraft.gg, LinkedIn, Substack, GitHub, FastAPI Agents, DeployScience, machine learning, data science, engineering leadership"
+      content="Blair Hudson, AI, artificial intelligence, software engineering, software engineering leader, startup advice, career advice, commbank, workday jobs, Clawkeys, Skillcraft, Skillcraft.gg, LinkedIn, Substack, GitHub, FastAPI Agents, sbx-agents, coding agents, Docker SBX, DeployScience, machine learning, data science, engineering leadership"
     />
     <meta name="author" content="Blair Hudson" />
     <meta name="robots" content="index, follow" />
@@ -33,7 +33,7 @@
     <meta property="og:title" content="blairhudson.com | Australian AI and software engineering leader" />
     <meta
       property="og:description"
-      content="Connect with Blair Hudson across Clawkeys, Skillcraft.gg, LinkedIn, career opportunities, Substack, GitHub, FastAPI Agents, and AI research at DeployScience."
+      content="Connect with Blair Hudson across Clawkeys, Skillcraft.gg, LinkedIn, career opportunities, Substack, GitHub, FastAPI Agents, sbx-agents, and AI research at DeployScience."
     />
     <meta property="og:url" content="https://blairhudson.com/" />
     <meta property="og:site_name" content="blairhudson.com" />
@@ -43,7 +43,7 @@
     <meta name="twitter:title" content="blairhudson.com | Australian AI and software engineering leader" />
     <meta
       name="twitter:description"
-      content="Direct links to Clawkeys, Skillcraft.gg, LinkedIn, career opportunities, Substack, GitHub, FastAPI Agents, and DeployScience publications."
+      content="Direct links to Clawkeys, Skillcraft.gg, LinkedIn, career opportunities, Substack, GitHub, FastAPI Agents, sbx-agents, and DeployScience publications."
     />
     <meta name="twitter:site" content="@blairhudson" />
     <meta name="twitter:creator" content="@blairhudson" />
@@ -62,6 +62,7 @@
           "https://sublight.substack.com",
           "https://github.com/blairhudson/",
           "https://fastapi-agents.blairhudson.com",
+          "https://blairhudson.com/sbx-agents/",
           "https://deployscience.com/publications/"
         ],
         "description": "Australian AI and software engineering leader."
@@ -107,6 +108,11 @@
           github: "https://github.com/blairhudson/",
           code: "https://github.com/blairhudson/",
           "fastapi-agents": "https://fastapi-agents.blairhudson.com",
+          "sbx-agents": "https://blairhudson.com/sbx-agents/",
+          sbx: "https://blairhudson.com/sbx-agents/",
+          sbxa: "https://blairhudson.com/sbx-agents/",
+          "coding-agents": "https://blairhudson.com/sbx-agents/",
+          "sandbox-agents": "https://blairhudson.com/sbx-agents/",
           future: "https://fastapi-agents.blairhudson.com",
           "deployscience-labs": "https://deployscience.com/publications/",
           research: "https://deployscience.com/publications/"
@@ -814,6 +820,13 @@
               subtitle: "build and deploy with agents",
               href: "https://fastapi-agents.blairhudson.com",
               className: ""
+            },
+            {
+              key: "sbx-agents",
+              label: "sbx-agents",
+              subtitle: "coding agents in sandboxes",
+              href: "https://blairhudson.com/sbx-agents/",
+              className: ""
             }
           ];
 
@@ -852,6 +865,11 @@
               title: "future signal",
               body: "fastapi-agents is the systems track: agents, deployment, and applied infrastructure.",
               tags: ["future", "fastapi", "open future"]
+            },
+            "sbx-agents": {
+              title: "sandboxed agent sdk",
+              body: "sbx-agents runs Codex, OpenCode, and custom coding agents inside Docker SBX, Docker, and other sandboxes.",
+              tags: ["sbx-agents", "coding agents", "open docs"]
             }
           };
 
@@ -1132,7 +1150,8 @@
               writing: 5,
               research: 6,
               code: 7,
-              future: 8
+              future: 8,
+              "sbx-agents": 9
             };
 
             if (typeof revealMap[signalName] === "number") {
@@ -1161,7 +1180,12 @@
               code: 7,
               future: 8,
               fastapi: 8,
-              "fastapi-agents": 8
+              "fastapi-agents": 8,
+              "sbx-agents": 9,
+              sbx: 9,
+              sbxa: 9,
+              "coding-agents": 9,
+              "sandbox-agents": 9
             };
 
             if (typeof aliasMap[normalized] === "number") {
@@ -1208,6 +1232,9 @@
               research: "usage: research",
               github: "usage: github",
               future: "usage: future",
+              "sbx-agents": "usage: sbx-agents",
+              sbx: "usage: sbx",
+              sbxa: "usage: sbxa",
               contact: "usage: contact",
               career: "usage: career",
               writing: "usage: writing",
@@ -1415,6 +1442,11 @@
 
             if (value === "fastapi" || value === "fastapi-agents" || value === "/bin/fastapi" || value === "/bin/fastapi-agents") {
               printLinkTarget(8);
+              return;
+            }
+
+            if (value === "sbx-agents" || value === "sbx" || value === "sbxa" || value === "coding-agents" || value === "sandbox-agents" || value === "/bin/sbx-agents" || value === "/bin/sbx" || value === "/bin/sbxa") {
+              printLinkTarget(9);
               return;
             }
 
