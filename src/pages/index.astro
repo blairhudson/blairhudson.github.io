@@ -1,0 +1,10 @@
+---
+import OsLayout from "../layouts/OsLayout.astro";
+---
+
+<OsLayout>
+  <div id="os-root" class="fixed inset-0 overflow-hidden" aria-live="polite"></div>
+  <script>
+    import "../os/kernel/boot";
+  </script>
+</OsLayout>

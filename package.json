@@ -1,0 +1,25 @@
+{
+  "name": "blairos-v2",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/check": "latest",
+    "@phosphor-icons/web": "latest",
+    "@tailwindcss/vite": "latest",
+    "@xterm/xterm": "latest",
+    "astro": "latest",
+    "fuse.js": "latest",
+    "interactjs": "latest",
+    "nanostores": "latest",
+    "nanoid": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest"
+  },
+  "devDependencies": {}
+}

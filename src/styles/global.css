@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --color-os-accent: #80f7ff;
+  --color-os-pink: #ff8bd5;
+  --color-os-green: #b7ff7a;
+  --color-os-panel: rgba(10, 14, 24, 0.72);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 15% 12%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 28%),
+    radial-gradient(circle at 78% 20%, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 26%),
+    radial-gradient(circle at 56% 88%, color-mix(in srgb, var(--accent-3) 14%, transparent), transparent 30%),
+    linear-gradient(135deg, var(--wallpaper-a), var(--wallpaper-b) 48%, var(--wallpaper-c));
+  color: var(--text);
+  font-family: var(--font-ui);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
+  opacity: var(--desktop-grid-opacity);
+  pointer-events: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+.xterm .xterm-viewport {
+  background: transparent !important;
+}
