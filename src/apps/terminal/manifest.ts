@@ -33,6 +33,10 @@ function readHistory() {
   }
 }
 
+function isSmallScreen() {
+  return window.matchMedia("(max-width: 720px)").matches;
+}
+
 export const terminalManifest: AppManifest = {
   id: "terminal",
   name: "Terminal",
@@ -237,18 +241,7 @@ export const terminalManifest: AppManifest = {
       drawNano();
     };
 
-    queueMicrotask(() => {
-      term.open(mount);
-      fitTerminal();
-      writelnVisible("BlairOS v2 terminal. type 'help'.");
-      writeVisible(`\x1b[36mblair\x1b[0m:${cwd}$ `);
-      term.focus();
-      keepBottomVisible();
-      requestAnimationFrame(fitTerminal);
-    });
-    new ResizeObserver(fitTerminal).observe(mount);
-
-    term.onData(async (data) => {
+    const handleTerminalInput = async (data: string) => {
       if (matrixTimer) return stopMatrix();
       if (nanoSession) {
         handleNanoInput(data);
@@ -306,8 +299,42 @@ export const terminalManifest: AppManifest = {
       } else if (code >= 32) {
         input += data;
         writeVisible(data);
-        }
+      }
+    };
+
+    window.addEventListener("blairos:os-key", (event) => {
+      const detail = (event as CustomEvent<{ processId?: string; data?: string }>).detail;
+      if (detail?.processId !== context.process.id || typeof detail.data !== "string") return;
+      void handleTerminalInput(detail.data);
     });
+
+    mount.addEventListener("pointerdown", (event) => {
+      if (!isSmallScreen()) return;
+      event.preventDefault();
+      event.stopPropagation();
+    });
+
+    queueMicrotask(() => {
+      term.open(mount);
+      if (isSmallScreen()) {
+        const textarea = term.element?.querySelector("textarea") as HTMLTextAreaElement | null;
+        if (textarea) {
+          textarea.readOnly = true;
+          textarea.inputMode = "none";
+          textarea.tabIndex = -1;
+          textarea.blur();
+        }
+      }
+      fitTerminal();
+      writelnVisible("BlairOS v2 terminal. type 'help'.");
+      writeVisible(`\x1b[36mblair\x1b[0m:${cwd}$ `);
+      if (!isSmallScreen()) term.focus();
+      keepBottomVisible();
+      requestAnimationFrame(fitTerminal);
+    });
+    new ResizeObserver(fitTerminal).observe(mount);
+
+    term.onData((data) => void handleTerminalInput(data));
 
     return root;
   }

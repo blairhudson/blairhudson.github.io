@@ -36,6 +36,25 @@ function browserTitleForUrl(url: string) {
   }
 }
 
+function frameBlockedLikely(url: string) {
+  try {
+    const host = new URL(url, window.location.origin).hostname.replace(/^www\./, "");
+    return [
+      "github.com",
+      "linkedin.com",
+      "x.com",
+      "twitter.com",
+      "facebook.com",
+      "instagram.com",
+      "youtube.com",
+      "substack.com",
+      "myworkdayjobs.com"
+    ].some((blocked) => host === blocked || host.endsWith(`.${blocked}`));
+  } catch {
+    return false;
+  }
+}
+
 export const browserManifest: AppManifest = {
   id: "browser",
   name: "Browser",
@@ -168,17 +187,17 @@ export const browserManifest: AppManifest = {
       content.className = url === "blairos://home" ? "min-h-0 flex-1 overflow-auto" : "min-h-0 flex-1 overflow-hidden";
       content.replaceChildren();
       if (url === "blairos://home") {
-        const grid = el("div", "grid gap-4 p-5 lg:grid-cols-[1.2fr_0.8fr]");
-        const hero = el("div", "rounded-[30px] border border-white/15 bg-gradient-to-br from-cyan-400/15 to-fuchsia-400/10 p-6");
+        const grid = el("div", "mx-auto grid w-full max-w-5xl min-w-0 gap-4 overflow-hidden p-5 max-sm:p-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]");
+        const hero = el("div", "min-w-0 rounded-[30px] border border-white/15 bg-gradient-to-br from-cyan-400/15 to-fuchsia-400/10 p-6 max-sm:p-4");
         append(hero, [
           el("div", "font-mono text-xs uppercase tracking-[0.35em] text-cyan-200", { text: "world wide web" }),
-          el("h2", "mt-3 text-4xl font-black tracking-[-0.08em]", { text: "Where do you want to go?" }),
+          el("h2", "mt-3 break-words text-4xl font-black tracking-[-0.08em] max-sm:text-3xl", { text: "Where do you want to go?" }),
           el("p", "mt-3 text-white/70", { text: "Type an address above, pick a bookmark, or head home." })
         ]);
-        const bookmarkList = el("div", "grid gap-2");
+        const bookmarkList = el("div", "grid min-w-0 gap-2");
         bookmarks.forEach((bookmark) => {
-          const item = el("button", `${subtleButton} grid grid-cols-[1fr_auto] gap-3`, { type: "button" });
-          append(item, [el("span", "font-semibold", { text: bookmark.title }), el("span", "font-mono text-xs text-white/40", { text: bookmark.url.replace(/^https?:\/\//, "") })]);
+          const item = el("button", `${subtleButton} grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)] gap-3 max-sm:grid-cols-1`, { type: "button" });
+          append(item, [el("span", "min-w-0 truncate font-semibold", { text: bookmark.title }), el("span", "min-w-0 truncate font-mono text-xs text-white/40", { text: bookmark.url.replace(/^https?:\/\//, "") })]);
           item.addEventListener("click", () => navigate(bookmark.url));
           bookmarkList.append(item);
         });
@@ -196,11 +215,32 @@ export const browserManifest: AppManifest = {
       const link = links.find((item) => item.href === url || item.key === url.replace("blairos://", ""));
       if (link || url.startsWith("http") || url.startsWith("/")) {
         const href = link?.href || url;
+        let openedNewTab = false;
+        const openInNewTab = () => {
+          if (openedNewTab) return;
+          openedNewTab = true;
+          window.open(href, "_blank", "noopener,noreferrer");
+          content.className = "min-h-0 flex-1 overflow-auto";
+          content.replaceChildren(append(el("div", "grid min-h-full place-items-center p-6 text-center"), [
+            append(el("div", "max-w-sm rounded-[30px] border border-white/10 bg-black/30 p-6"), [
+              icon("ph-arrow-square-out", "mx-auto text-4xl text-cyan-200"),
+              el("h2", "mt-3 text-2xl font-black tracking-[-0.05em]", { text: "Opened in a new tab" }),
+              el("p", "mt-2 text-sm text-white/55", { text: href.replace(/^https?:\/\//, "") })
+            ])
+          ]));
+        };
+
+        if (frameBlockedLikely(href)) {
+          openInNewTab();
+          return;
+        }
+
         const frame = el("iframe", "h-full w-full border-0 bg-white", {
           src: href,
           title: link?.label || href,
           referrerpolicy: "no-referrer-when-downgrade"
         }) as HTMLIFrameElement;
+        frame.addEventListener("error", openInNewTab);
         frame.addEventListener("load", () => {
           try {
             const title = frame.contentDocument?.title || frame.contentWindow?.document.title;

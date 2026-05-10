@@ -17,6 +17,7 @@ html,
 body {
   margin: 0;
   min-height: 100%;
+  touch-action: manipulation;
 }
 
 body {
@@ -52,6 +53,7 @@ select {
 
 button {
   color: inherit;
+  touch-action: manipulation;
 }
 
 a {
@@ -60,4 +62,33 @@ a {
 
 .xterm .xterm-viewport {
   background: transparent !important;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --menu-height: 42px;
+    --dock-height: 76px;
+    --mobile-bottom-height: var(--dock-height);
+  }
+
+  html,
+  body,
+  #os-root {
+    height: 100dvh;
+    max-height: 100dvh;
+    overscroll-behavior: none;
+    touch-action: pan-x pan-y;
+  }
+
+  body {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }

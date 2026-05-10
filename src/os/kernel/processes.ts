@@ -45,15 +45,16 @@ export function launchApp(appId: AppId, data: Record<string, unknown> = {}) {
   }
 
   const id = nanoid(8);
-  const width = Math.min(app.defaultSize.width, window.innerWidth - 32);
-  const height = Math.min(app.defaultSize.height, window.innerHeight - 120);
+  const mobile = window.matchMedia("(max-width: 720px)").matches;
+  const width = mobile ? Math.max(320, window.innerWidth - 12) : Math.min(app.defaultSize.width, window.innerWidth - 32);
+  const height = mobile ? Math.max(420, window.innerHeight - 128) : Math.min(app.defaultSize.height, window.innerHeight - 120);
   const process: ProcessRecord = {
     id,
     appId,
     title: app.name,
     icon: app.icon,
-    x: 80 + launchOffset,
-    y: 64 + launchOffset,
+    x: mobile ? 6 : 80 + launchOffset,
+    y: mobile ? 6 : 64 + launchOffset,
     width,
     height,
     z: ++zCounter,
@@ -62,7 +63,7 @@ export function launchApp(appId: AppId, data: Record<string, unknown> = {}) {
     data
   };
 
-  launchOffset = (launchOffset + 28) % 160;
+  launchOffset = mobile ? 0 : (launchOffset + 28) % 160;
   processes.set([...processes.get(), process]);
   focusedProcessId.set(id);
   saveSession();
