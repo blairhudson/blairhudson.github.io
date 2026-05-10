@@ -109,6 +109,14 @@ function iconFor(type: FsNode["type"]) {
   return "ph-file-text";
 }
 
+function documentIconFor(path: string) {
+  if (/\.(png|jpe?g|gif|webp|svg)$/i.test(path)) return "ph-image";
+  if (/\.(sheet|csv)$/i.test(path)) return "ph-table";
+  if (/\.html?$/i.test(path)) return "ph-file-html";
+  if (/\.md$/i.test(path)) return "ph-file-md";
+  return "ph-file-text";
+}
+
 function retarget(node: FsNode, nextPath: string): FsNode {
   const renamed = cloneNode(node);
   const rename = (current: FsNode, path: string) => {
@@ -191,7 +199,7 @@ export function createNode(path: string, type: "folder" | "document", body = "")
     name: baseName(normalized),
     path: normalized,
     type,
-    icon: iconFor(type),
+    icon: type === "document" ? documentIconFor(normalized) : iconFor(type),
     ...(type === "document" ? { body } : { children: [] })
   });
   touchCreated(normalized);

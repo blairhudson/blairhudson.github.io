@@ -54,6 +54,12 @@ function renderMarkdown(markdown: string) {
   return html.join("");
 }
 
+function imageSource(nodeBody = "", path = "") {
+  if (nodeBody.startsWith("data:image/")) return nodeBody;
+  if (path.toLowerCase().endsWith(".svg") && nodeBody.trim().startsWith("<svg")) return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(nodeBody)}`;
+  return "";
+}
+
 export const previewManifest: AppManifest = {
   id: "preview",
   name: "Preview",
@@ -68,6 +74,15 @@ export const previewManifest: AppManifest = {
     append(root, [append(el("header", "flex items-center justify-between gap-3 border-b border-white/10 p-4"), [append(el("div", "flex min-w-0 items-center gap-3"), [icon(node?.icon ?? "ph-file", "text-3xl text-cyan-200"), append(el("div", "min-w-0"), [el("h2", "truncate text-lg font-bold", { text: node?.name ?? "No Selection" }), el("p", "truncate font-mono text-xs text-white/45", { text: node?.path ?? path })])]), codeMode])]);
     const body = el("div", "overflow-auto p-5");
     if (node?.href) body.append(el("iframe", "h-full min-h-[360px] w-full rounded-2xl border border-white/10 bg-white", { src: node.href, title: node.name }));
+    else if (node && /\.(png|jpe?g|gif|webp|svg)$/i.test(node.name)) {
+      const src = imageSource(node.body, node.path);
+      body.append(src
+        ? append(el("figure", "grid min-h-full place-items-center gap-4 rounded-3xl border border-white/10 bg-black/45 p-4"), [
+          el("img", "max-h-[calc(100vh-14rem)] max-w-full rounded-2xl object-contain shadow-2xl", { src, alt: node.name }),
+          el("figcaption", "font-mono text-xs text-white/45", { text: `${node.name} · image preview` })
+        ])
+        : el("div", "rounded-3xl border border-amber-200/20 bg-amber-200/10 p-5 text-sm text-amber-100", { text: `${node.path}: image data unavailable` }));
+    }
     else if (node?.name.endsWith(".md")) body.append(el("article", "mx-auto max-w-3xl rounded-3xl border border-white/10 bg-black/30 p-6", { html: renderMarkdown(node.body ?? "") }));
     else body.append(el("pre", "whitespace-pre-wrap rounded-3xl border border-white/10 bg-black/35 p-5 text-sm leading-6 text-white/75", { text: node?.body ?? `${path}: no preview available` }));
     append(root, [body]);

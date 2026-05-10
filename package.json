@@ -15,11 +15,11 @@
     "@xterm/xterm": "latest",
     "astro": "latest",
     "fuse.js": "latest",
+    "html-to-image": "^1.11.13",
     "interactjs": "latest",
-    "nanostores": "latest",
     "nanoid": "latest",
+    "nanostores": "latest",
     "tailwindcss": "latest",
     "typescript": "latest"
-  },
-  "devDependencies": {}
+  }
 }

@@ -1,9 +1,10 @@
 import Fuse from "fuse.js";
+import { toCanvas } from "html-to-image";
 import interact from "interactjs";
 import { appManifests, appRegistry } from "./apps";
 import { append, el, glass, icon } from "./dom";
 import { copyNode, createNode, desktopNodes, findNode, moveNode, removeNode, searchableNodes, writeDocument } from "./filesystem";
-import { jobs, startJob, finishJob, updateJob } from "./jobs";
+import { jobs, startJob, finishJob, failJob, updateJob } from "./jobs";
 import { logEvent } from "./logs";
 import { metadataFor, setComment, setTags, toggleFavorite, touchOpened } from "./metadata";
 import { addNotification, clearNotifications, notifications } from "./notifications";
@@ -68,7 +69,7 @@ function notify(message: string) {
   toastTimer = window.setTimeout(() => toast.remove(), 2600);
 }
 
-function runJob(name: string, app: string, detail: string, done: () => void) {
+function runJob(name: string, app: string, detail: string, done: () => void | Promise<void>) {
   const id = startJob(name, app, detail);
   logEvent(app, `started ${name}`);
   let progress = 8;
@@ -76,12 +77,19 @@ function runJob(name: string, app: string, detail: string, done: () => void) {
     progress = Math.min(92, progress + 14 + Math.round(Math.random() * 13));
     updateJob(id, { progress });
   }, 180);
-  window.setTimeout(() => {
+  window.setTimeout(async () => {
     window.clearInterval(timer);
-    done();
-    finishJob(id, "complete");
-    logEvent(app, `finished ${name}`);
-    notify(`${name} complete`);
+    try {
+      await done();
+      finishJob(id, "complete");
+      logEvent(app, `finished ${name}`);
+      notify(`${name} complete`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "failed";
+      failJob(id, message);
+      logEvent(app, `failed ${name}: ${message}`);
+      notify(`${name} failed`);
+    }
   }, 820);
 }
 
@@ -100,13 +108,72 @@ function contextOpenUrl(node: FsNode) {
   launchApp("browser", { url: node.href || node.path });
 }
 
+async function drawAccessibleIframeContents(canvas: HTMLCanvasElement) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  const rootRect = root.getBoundingClientRect();
+  const scaleX = canvas.width / Math.max(1, rootRect.width);
+  const scaleY = canvas.height / Math.max(1, rootRect.height);
+  const frames = [...root.querySelectorAll("iframe")] as HTMLIFrameElement[];
+
+  for (const frame of frames) {
+    try {
+      const doc = frame.contentDocument;
+      const target = doc?.documentElement || doc?.body;
+      if (!target) continue;
+
+      const rect = frame.getBoundingClientRect();
+      const width = Math.max(1, Math.floor(rect.width));
+      const height = Math.max(1, Math.floor(rect.height));
+      const frameCanvas = await toCanvas(target, {
+        cacheBust: true,
+        pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+        width,
+        height,
+        style: { transform: "none" }
+      });
+
+      ctx.drawImage(
+        frameCanvas,
+        0,
+        0,
+        frameCanvas.width,
+        frameCanvas.height,
+        (rect.left - rootRect.left) * scaleX,
+        (rect.top - rootRect.top) * scaleY,
+        rect.width * scaleX,
+        rect.height * scaleY
+      );
+    } catch {
+      // Cross-origin frames intentionally block pixel access; leave captured shell as-is.
+    }
+  }
+}
+
+async function currentRenderingScreenshotDataUrl() {
+  const canvas = await toCanvas(root, {
+    cacheBust: true,
+    pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+    width: root.clientWidth || window.innerWidth,
+    height: root.clientHeight || window.innerHeight,
+    style: {
+      transform: "none"
+    }
+  });
+  await drawAccessibleIframeContents(canvas);
+  return canvas.toDataURL("image/png");
+}
+
 function takeScreenshot() {
-  runJob("Screenshot", "windowserver", "capturing desktop", () => {
+  runJob("Screenshot", "windowserver", "capturing desktop", async () => {
     const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-    const path = `/Desktop/Screenshot ${stamp}.txt`;
-    const body = `BlairOS screenshot\nCaptured: ${new Date().toLocaleString()}\nWindows: ${processes.get().map((process) => process.title).join(", ") || "Desktop"}`;
+    const path = `/Desktop/Screenshot ${stamp}.png`;
+    const body = await currentRenderingScreenshotDataUrl();
+    if (!body) throw new Error("empty capture");
     const error = findNode(path) ? writeDocument(path, body) : createNode(path, "document", body);
-    if (error) notify(error);
+    if (error) throw new Error(error);
+    notify(`Saved ${path}`);
+    launchApp("preview", { path });
   });
 }
 
@@ -620,7 +687,7 @@ function naturalActions(query: string): SearchItem[] {
     const actions: SearchItem[] = [];
     if (/^new note|note /.test(q)) actions.push({ id: "action:new-note", title: "New note", subtitle: "Create note", icon: "ph-notebook", kind: "action", action: () => launchApp("notes") });
     if (/notification|alerts|jobs/.test(q)) actions.push({ id: "action:notifications", title: "Notification Center", subtitle: "Notifications and background jobs", icon: "ph-bell", kind: "action", action: () => showNotificationCenter() });
-    if (/screenshot|capture/.test(q)) actions.push({ id: "action:screenshot", title: "Take screenshot", subtitle: "Save capture note to Desktop", icon: "ph-camera", kind: "action", action: takeScreenshot });
+    if (/screenshot|capture/.test(q)) actions.push({ id: "action:screenshot", title: "Take screenshot", subtitle: "Save image to Desktop", icon: "ph-camera", kind: "action", action: takeScreenshot });
     if (/lock|sleep/.test(q)) actions.push({ id: "action:lock", title: "Lock screen", subtitle: "Sleep display", icon: "ph-lock", kind: "action", action: showLockScreen });
     if (/console|logs|log/.test(q)) actions.push({ id: "action:logs", title: "Open Console", subtitle: "System logs", icon: "ph-list-magnifying-glass", kind: "action", action: () => launchApp("console") });
     if (/activity|process|jobs/.test(q)) actions.push({ id: "action:activity", title: "Open Activity Monitor", subtitle: "Processes and jobs", icon: "ph-pulse", kind: "action", action: () => launchApp("activityMonitor") });
