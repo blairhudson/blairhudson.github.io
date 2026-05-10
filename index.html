@@ -13,11 +13,11 @@
     />
     <meta
       name="description"
-      content="Blair Hudson - Australian AI and software engineering leader. Career, startup, and AI opportunities, plus links to Clawkeys, Skillcraft.gg, LinkedIn, Workday roles, Substack, GitHub, FastAPI Agents, sbx-agents, and DeployScience publications."
+      content="Blair Hudson - Australian AI and software engineering leader. Career, startup, and AI opportunities, plus links to Clawkeys, sbx-agents, Agile Weekend, Skillcraft.gg, LinkedIn, Workday roles, Substack, GitHub, FastAPI Agents, and DeployScience publications."
     />
     <meta
       name="keywords"
-      content="Blair Hudson, AI, artificial intelligence, software engineering, software engineering leader, startup advice, career advice, commbank, workday jobs, Clawkeys, Skillcraft, Skillcraft.gg, LinkedIn, Substack, GitHub, FastAPI Agents, sbx-agents, coding agents, Docker SBX, DeployScience, machine learning, data science, engineering leadership"
+      content="Blair Hudson, AI, artificial intelligence, software engineering, software engineering leader, startup advice, career advice, commbank, workday jobs, Clawkeys, sbx-agents, Agile Weekend, weekend projects, Skillcraft, Skillcraft.gg, LinkedIn, Substack, GitHub, FastAPI Agents, coding agents, Docker SBX, DeployScience, machine learning, data science, engineering leadership"
     />
     <meta name="author" content="Blair Hudson" />
     <meta name="robots" content="index, follow" />
@@ -33,7 +33,7 @@
     <meta property="og:title" content="blairhudson.com | Australian AI and software engineering leader" />
     <meta
       property="og:description"
-      content="Connect with Blair Hudson across Clawkeys, Skillcraft.gg, LinkedIn, career opportunities, Substack, GitHub, FastAPI Agents, sbx-agents, and AI research at DeployScience."
+      content="Connect with Blair Hudson across Clawkeys, sbx-agents, Agile Weekend, Skillcraft.gg, LinkedIn, career opportunities, Substack, GitHub, FastAPI Agents, and AI research at DeployScience."
     />
     <meta property="og:url" content="https://blairhudson.com/" />
     <meta property="og:site_name" content="blairhudson.com" />
@@ -43,7 +43,7 @@
     <meta name="twitter:title" content="blairhudson.com | Australian AI and software engineering leader" />
     <meta
       name="twitter:description"
-      content="Direct links to Clawkeys, Skillcraft.gg, LinkedIn, career opportunities, Substack, GitHub, FastAPI Agents, sbx-agents, and DeployScience publications."
+      content="Direct links to Clawkeys, sbx-agents, Agile Weekend, Skillcraft.gg, LinkedIn, career opportunities, Substack, GitHub, FastAPI Agents, and DeployScience publications."
     />
     <meta name="twitter:site" content="@blairhudson" />
     <meta name="twitter:creator" content="@blairhudson" />
@@ -57,12 +57,13 @@
         "jobTitle": "AI and software engineering leader",
         "sameAs": [
           "https://github.com/blairhudson/clawkeys",
+          "https://blairhudson.com/sbx-agents/",
+          "https://blairhudson.com/agile-weekend/",
           "https://skillcraft.gg/",
           "https://linkedin.com/in/blairhudson",
           "https://sublight.substack.com",
           "https://github.com/blairhudson/",
           "https://fastapi-agents.blairhudson.com",
-          "https://blairhudson.com/sbx-agents/",
           "https://deployscience.com/publications/"
         ],
         "description": "Australian AI and software engineering leader."
@@ -95,6 +96,9 @@
       (() => {
         const routeRedirects = {
           clawkeys: "https://github.com/blairhudson/clawkeys",
+          "agile-weekend": "https://blairhudson.com/agile-weekend/",
+          agile: "https://blairhudson.com/agile-weekend/",
+          weekend: "https://blairhudson.com/agile-weekend/",
           skillcraft: "https://skillcraft.gg/",
           "skillcraft.gg": "https://skillcraft.gg/",
           "awdl-jit": "https://blairhudson.com/awdl-jit/",
@@ -766,6 +770,20 @@
               className: ""
             },
             {
+              key: "sbx-agents",
+              label: "sbx-agents",
+              subtitle: "coding agents in sandboxes",
+              href: "https://blairhudson.com/sbx-agents/",
+              className: ""
+            },
+            {
+              key: "agile-weekend",
+              label: "agile weekend",
+              subtitle: "plan a weekend project, track what happened, and share the outcome",
+              href: "https://blairhudson.com/agile-weekend/",
+              className: ""
+            },
+            {
               key: "skillcraft.gg",
               label: "skillcraft.gg",
               subtitle: "prove your ai coding skills",
@@ -820,13 +838,6 @@
               subtitle: "build and deploy with agents",
               href: "https://fastapi-agents.blairhudson.com",
               className: ""
-            },
-            {
-              key: "sbx-agents",
-              label: "sbx-agents",
-              subtitle: "coding agents in sandboxes",
-              href: "https://blairhudson.com/sbx-agents/",
-              className: ""
             }
           ];
 
@@ -870,6 +881,11 @@
               title: "sandboxed agent sdk",
               body: "sbx-agents runs Codex, OpenCode, and custom coding agents inside Docker SBX, Docker, and other sandboxes.",
               tags: ["sbx-agents", "coding agents", "open docs"]
+            },
+            "agile-weekend": {
+              title: "weekend project sprint",
+              body: "agile weekend helps plan a weekend project, track what happened, and export a polished linkedin update.",
+              tags: ["agile weekend", "weekend projects", "open app"]
             }
           };
 
@@ -1145,13 +1161,14 @@
             revealedSignal.value = signalName;
 
             const revealMap = {
-              contact: 3,
-              career: 4,
-              writing: 5,
-              research: 6,
-              code: 7,
-              future: 8,
-              "sbx-agents": 9
+              "sbx-agents": 1,
+              "agile-weekend": 2,
+              contact: 5,
+              career: 6,
+              writing: 7,
+              research: 8,
+              code: 9,
+              future: 10
             };
 
             if (typeof revealMap[signalName] === "number") {
@@ -1163,29 +1180,32 @@
             const normalized = target.trim().toLowerCase();
             const aliasMap = {
               clawkeys: 0,
-              skillcraft: 1,
-              "skillcraft.gg": 1,
-              "awdl-jit": 2,
-              linkedin: 3,
-              contact: 3,
-              work: 4,
-              "work-with-me": 4,
-              career: 4,
-              substack: 5,
-              writing: 5,
-              research: 6,
-              deployscience: 6,
-              "deployscience-labs": 6,
-              github: 7,
-              code: 7,
-              future: 8,
-              fastapi: 8,
-              "fastapi-agents": 8,
-              "sbx-agents": 9,
-              sbx: 9,
-              sbxa: 9,
-              "coding-agents": 9,
-              "sandbox-agents": 9
+              "sbx-agents": 1,
+              sbx: 1,
+              sbxa: 1,
+              "coding-agents": 1,
+              "sandbox-agents": 1,
+              "agile-weekend": 2,
+              agile: 2,
+              weekend: 2,
+              skillcraft: 3,
+              "skillcraft.gg": 3,
+              "awdl-jit": 4,
+              linkedin: 5,
+              contact: 5,
+              work: 6,
+              "work-with-me": 6,
+              career: 6,
+              substack: 7,
+              writing: 7,
+              research: 8,
+              deployscience: 8,
+              "deployscience-labs": 8,
+              github: 9,
+              code: 9,
+              future: 10,
+              fastapi: 10,
+              "fastapi-agents": 10
             };
 
             if (typeof aliasMap[normalized] === "number") {
@@ -1223,6 +1243,12 @@
               clear: "usage: clear",
               open: "usage: open [--new-tab] <target>",
               clawkeys: "usage: clawkeys",
+              "sbx-agents": "usage: sbx-agents",
+              sbx: "usage: sbx",
+              sbxa: "usage: sbxa",
+              "agile-weekend": "usage: agile-weekend",
+              agile: "usage: agile",
+              weekend: "usage: weekend",
               skillcraft: "usage: skillcraft",
               "skillcraft.gg": "usage: skillcraft.gg",
               "awdl-jit": "usage: awdl-jit",
@@ -1232,9 +1258,6 @@
               research: "usage: research",
               github: "usage: github",
               future: "usage: future",
-              "sbx-agents": "usage: sbx-agents",
-              sbx: "usage: sbx",
-              sbxa: "usage: sbxa",
               contact: "usage: contact",
               career: "usage: career",
               writing: "usage: writing",
@@ -1268,7 +1291,8 @@
               print([
                 "available programs in /bin:",
                 "help  ls  pwd  whoami  hostname  clear  open",
-                "clawkeys  skillcraft.gg  awdl-jit  linkedin  work",
+                "clawkeys  sbx-agents  agile-weekend  skillcraft.gg  awdl-jit",
+                "linkedin  work",
                 "substack  research  github  future  contact  career  writing  code"
               ]);
               return;
@@ -1302,6 +1326,8 @@
                   "clear",
                   "open",
                   "clawkeys",
+                  "sbx-agents",
+                  "agile-weekend",
                   "skillcraft.gg",
                   "awdl-jit",
                   "linkedin",
@@ -1376,52 +1402,52 @@
             }
 
             if (value === "linkedin" || value === "/bin/linkedin") {
-              printLinkTarget(3);
+              printLinkTarget(5);
               return;
             }
 
             if (value === "work" || value === "/bin/work") {
-              printLinkTarget(4);
-              return;
-            }
-
-            if (value === "substack" || value === "/bin/substack") {
-              printLinkTarget(5);
-              return;
-            }
-
-            if (value === "github" || value === "/bin/github") {
-              printLinkTarget(7);
-              return;
-            }
-
-            if (value === "contact" || value === "/bin/contact") {
-              printLinkTarget(3);
-              return;
-            }
-
-            if (value === "career" || value === "/bin/career") {
-              printLinkTarget(4);
-              return;
-            }
-
-            if (value === "writing" || value === "/bin/writing") {
-              printLinkTarget(5);
-              return;
-            }
-
-            if (value === "research" || value === "/bin/research") {
               printLinkTarget(6);
               return;
             }
 
-            if (value === "code" || value === "/bin/code") {
+            if (value === "substack" || value === "/bin/substack") {
               printLinkTarget(7);
               return;
             }
 
-            if (value === "future" || value === "/bin/future") {
+            if (value === "github" || value === "/bin/github") {
+              printLinkTarget(9);
+              return;
+            }
+
+            if (value === "contact" || value === "/bin/contact") {
+              printLinkTarget(5);
+              return;
+            }
+
+            if (value === "career" || value === "/bin/career") {
+              printLinkTarget(6);
+              return;
+            }
+
+            if (value === "writing" || value === "/bin/writing") {
+              printLinkTarget(7);
+              return;
+            }
+
+            if (value === "research" || value === "/bin/research") {
               printLinkTarget(8);
+              return;
+            }
+
+            if (value === "code" || value === "/bin/code") {
+              printLinkTarget(9);
+              return;
+            }
+
+            if (value === "future" || value === "/bin/future") {
+              printLinkTarget(10);
               return;
             }
 
@@ -1430,28 +1456,33 @@
               return;
             }
 
-            if (value === "skillcraft" || value === "skillcraft.gg" || value === "/bin/skillcraft" || value === "/bin/skillcraft.gg") {
+            if (value === "sbx-agents" || value === "sbx" || value === "sbxa" || value === "coding-agents" || value === "sandbox-agents" || value === "/bin/sbx-agents" || value === "/bin/sbx" || value === "/bin/sbxa") {
               printLinkTarget(1);
               return;
             }
 
-            if (value === "awdl-jit" || value === "/bin/awdl-jit") {
+            if (value === "agile-weekend" || value === "agile" || value === "weekend" || value === "/bin/agile-weekend" || value === "/bin/agile" || value === "/bin/weekend") {
               printLinkTarget(2);
               return;
             }
 
-            if (value === "fastapi" || value === "fastapi-agents" || value === "/bin/fastapi" || value === "/bin/fastapi-agents") {
-              printLinkTarget(8);
+            if (value === "skillcraft" || value === "skillcraft.gg" || value === "/bin/skillcraft" || value === "/bin/skillcraft.gg") {
+              printLinkTarget(3);
               return;
             }
 
-            if (value === "sbx-agents" || value === "sbx" || value === "sbxa" || value === "coding-agents" || value === "sandbox-agents" || value === "/bin/sbx-agents" || value === "/bin/sbx" || value === "/bin/sbxa") {
-              printLinkTarget(9);
+            if (value === "awdl-jit" || value === "/bin/awdl-jit") {
+              printLinkTarget(4);
+              return;
+            }
+
+            if (value === "fastapi" || value === "fastapi-agents" || value === "/bin/fastapi" || value === "/bin/fastapi-agents") {
+              printLinkTarget(10);
               return;
             }
 
             if (value === "deployscience" || value === "deployscience-labs" || value === "/bin/deployscience" || value === "/bin/deployscience-labs") {
-              printLinkTarget(6);
+              printLinkTarget(8);
               return;
             }
 
