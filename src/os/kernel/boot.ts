@@ -556,6 +556,7 @@ function makeMenuBar() {
   });
 
   function closeMenu() {
+    openDropdownAnchor?.blur();
     openDropdown?.remove();
     openDropdown = null;
     openDropdownAnchor = null;
@@ -592,6 +593,13 @@ function makeMenuBar() {
     root.append(openDropdown);
   }
 
+  function switchMenuOnHover(button: HTMLElement, itemsForButton: () => MenuItem[]) {
+    button.addEventListener("mouseenter", () => {
+      if (!openDropdown || openDropdownAnchor === button || isSmallScreen()) return;
+      showMenu(button, itemsForButton());
+    });
+  }
+
   function menuButton(label: string, items: MenuItem[]) {
     const button = el("button", `${menuButtonClass} max-sm:hidden`, { type: "button", text: label });
     button.dataset.menuKey = label;
@@ -599,6 +607,7 @@ function makeMenuBar() {
       event.stopPropagation();
       showMenu(button, items);
     });
+    switchMenuOnHover(button, () => items);
     return button;
   }
 
@@ -630,6 +639,44 @@ function makeMenuBar() {
       { label: "Restore Minimized", action: () => processes.get().filter((item) => item.minimized).forEach((item) => restoreProcess(item.id)) },
       { label: "Help" },
       { label: "Keyboard Shortcuts", action: () => notify("Cmd+K launcher, Cmd+Space terminal, window dots control close/min/max") }
+    ];
+  }
+
+  function blairOsMenuItems(): MenuItem[] {
+    const recentItems = getRecentItems().slice(0, 5).map((item) => ({ label: item.title, action: () => runRecent(item) }));
+    return [
+      { label: "System" },
+      { label: "About BlairOS", action: () => launchApp("about") },
+      { label: "System Settings", shortcut: "Cmd+,", action: () => launchApp("settings") },
+      { label: "Launcher", shortcut: "Cmd+K", action: openLauncher },
+      { label: "Recent" },
+      ...recentItems,
+      { label: "Clear Recent Items", action: clearRecentItems },
+      { label: "Sleep", action: () => notify("Display sleeping. Move pointer or press key to wake.") }
+    ];
+  }
+
+  function activeAppMenuItems(): MenuItem[] {
+    const process = focusedProcess();
+    const appName = process ? appRegistry[process.appId].name : "Finder";
+    return process ? [
+      { label: "App" },
+      { label: `About ${appName}`, action: () => process.appId === "about" ? notify("Already viewing About BlairOS") : launchApp("about") },
+      { label: `New ${appName} Window`, action: () => launchApp(process.appId, process.data ?? {}) },
+      { label: "File" },
+      ...fileItems(),
+      { label: "Window" },
+      { label: "Minimize", shortcut: "Cmd+M", action: () => minimizeProcess(process.id) },
+      { label: process.maximized ? "Exit Full Window" : "Full Window", action: () => toggleMaximizeProcess(process.id) },
+      { label: "Close Window", shortcut: "Cmd+W", action: () => closeProcess(process.id) }
+    ] : [
+      { label: "System" },
+      { label: "About BlairOS", action: () => launchApp("about") },
+      { label: "File" },
+      ...fileItems(),
+      { label: "Navigation" },
+      { label: "Open Launcher", shortcut: "Cmd+K", action: openLauncher },
+      { label: "Show Desktop", action: () => launchApp("files", { path: "/Desktop" }) }
     ];
   }
 
@@ -693,18 +740,9 @@ function makeMenuBar() {
 
   bindButtonAction(mark, (event) => {
     event.stopPropagation();
-    const recentItems = getRecentItems().slice(0, 5).map((item) => ({ label: item.title, action: () => runRecent(item) }));
-    showMenu(mark, [
-      { label: "System" },
-      { label: "About BlairOS", action: () => launchApp("about") },
-      { label: "System Settings", shortcut: "Cmd+,", action: () => launchApp("settings") },
-      { label: "Launcher", shortcut: "Cmd+K", action: openLauncher },
-      { label: "Recent" },
-      ...recentItems,
-      { label: "Clear Recent Items", action: clearRecentItems },
-      { label: "Sleep", action: () => notify("Display sleeping. Move pointer or press key to wake.") }
-    ]);
+    showMenu(mark, blairOsMenuItems());
   });
+  switchMenuOnHover(mark, blairOsMenuItems);
 
   bindButtonAction(activeApp, (event) => {
     event.stopPropagation();
@@ -712,28 +750,9 @@ function makeMenuBar() {
       showMenu(activeApp, mobileMenuItems());
       return;
     }
-    const process = focusedProcess();
-    const appName = process ? appRegistry[process.appId].name : "Finder";
-    showMenu(activeApp, process ? [
-      { label: "App" },
-      { label: `About ${appName}`, action: () => process.appId === "about" ? notify("Already viewing About BlairOS") : launchApp("about") },
-      { label: `New ${appName} Window`, action: () => launchApp(process.appId, process.data ?? {}) },
-      { label: "File" },
-      ...fileItems(),
-      { label: "Window" },
-      { label: "Minimize", shortcut: "Cmd+M", action: () => minimizeProcess(process.id) },
-      { label: process.maximized ? "Exit Full Window" : "Full Window", action: () => toggleMaximizeProcess(process.id) },
-      { label: "Close Window", shortcut: "Cmd+W", action: () => closeProcess(process.id) }
-    ] : [
-      { label: "System" },
-      { label: "About BlairOS", action: () => launchApp("about") },
-      { label: "File" },
-      ...fileItems(),
-      { label: "Navigation" },
-      { label: "Open Launcher", shortcut: "Cmd+K", action: openLauncher },
-      { label: "Show Desktop", action: () => launchApp("files", { path: "/Desktop" }) }
-    ]);
+    showMenu(activeApp, activeAppMenuItems());
   });
+  switchMenuOnHover(activeApp, activeAppMenuItems);
 
   const editMenu = menuButton("Edit", [
     { label: "Copy", shortcut: "Cmd+C", action: () => notify("Copy") },
