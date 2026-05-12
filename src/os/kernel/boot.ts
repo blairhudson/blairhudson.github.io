@@ -535,14 +535,14 @@ function makeBoot() {
 }
 
 function makeMenuBar() {
-  const menu = el("header", "fixed inset-x-0 top-0 z-[7000] grid h-[var(--menu-height)] grid-cols-[1fr_auto] items-center gap-3 border-b border-white/10 bg-slate-950/70 px-3 text-[0.82rem] backdrop-blur-2xl max-sm:gap-1 max-sm:px-2");
+  const menu = el("header", "fixed inset-x-0 top-0 z-[7000] grid h-[var(--menu-height)] grid-cols-[1fr_auto] items-center gap-3 border-b border-white/10 bg-slate-950/70 px-3 text-[0.82rem] backdrop-blur-2xl");
   const left = el("div", "flex min-w-0 items-center gap-1 overflow-hidden");
   let openDropdown: HTMLElement | null = null;
   let openDropdownAnchor: HTMLElement | null = null;
   let openDropdownKey: string | null = null;
   const menuButtonClass = "rounded-md px-2 py-1 font-medium text-white/75 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-300/40";
-  const mark = el("button", `${menuButtonClass} mr-1 font-black tracking-[-.04em] text-white max-sm:py-2`, { type: "button", text: "BlairOS" });
-  activeApp = el("button", `${menuButtonClass} max-w-36 truncate font-bold text-white/85 max-sm:max-w-[7.5rem] max-sm:px-1.5 max-sm:py-2`, { type: "button", text: "Finder" });
+  const mark = el("button", `${menuButtonClass} mr-1 font-black tracking-[-.04em] text-white`, { type: "button", text: "BlairOS" });
+  activeApp = el("button", `${menuButtonClass} max-w-36 truncate font-bold text-white/85 max-sm:max-w-[7.5rem] max-sm:px-1.5`, { type: "button", text: "Finder" });
   let markClicks = 0;
   let markTimer: number | undefined;
   mark.addEventListener("click", () => {
@@ -614,21 +614,22 @@ function makeMenuBar() {
     const process = focusedProcess();
     const appName = process ? appRegistry[process.appId].name : "Finder";
     return [
-      { label: "App" },
-      { label: `${appName}: About`, action: () => process?.appId === "about" ? notify("Already viewing About BlairOS") : launchApp("about") },
-      { label: `${appName}: New Window`, action: () => process ? launchApp(process.appId, process.data ?? {}) : launchApp("files", { path: "/Home/blair" }) },
+      { label: "File" },
+      { label: `About ${appName}`, action: () => process?.appId === "about" ? notify("Already viewing About BlairOS") : launchApp("about") },
+      { label: "New Window", action: () => process ? launchApp(process.appId, process.data ?? {}) : launchApp("files", { path: "/Home/blair" }) },
       { label: "Edit" },
-      { label: "Edit: Copy", shortcut: "Cmd+C", action: () => notify("Copy") },
-      { label: "Edit: Paste", shortcut: "Cmd+V", action: () => notify("Paste") },
-      { label: "Navigation" },
-      { label: "View: Open Launcher", shortcut: "Cmd+K", action: openLauncher },
-      { label: "Go: Desktop", action: () => launchApp("files", { path: "/Desktop" }) },
-      { label: "Go: Applications", action: () => launchApp("files", { path: "/Applications" }) },
+      { label: "Copy", shortcut: "Cmd+C", action: () => notify("Copy") },
+      { label: "Paste", shortcut: "Cmd+V", action: () => notify("Paste") },
+      { label: "View" },
+      { label: "Open Launcher", shortcut: "Cmd+K", action: openLauncher },
+      { label: "Go" },
+      { label: "Desktop", action: () => launchApp("files", { path: "/Desktop" }) },
+      { label: "Applications", action: () => launchApp("files", { path: "/Applications" }) },
       { label: "Window" },
-      { label: "Window: Minimize", shortcut: "Cmd+M", action: () => { if (process) minimizeProcess(process.id); } },
-      { label: "Window: Restore Minimized", action: () => processes.get().filter((item) => item.minimized).forEach((item) => restoreProcess(item.id)) },
+      { label: "Minimize", shortcut: "Cmd+M", action: () => { if (process) minimizeProcess(process.id); } },
+      { label: "Restore Minimized", action: () => processes.get().filter((item) => item.minimized).forEach((item) => restoreProcess(item.id)) },
       { label: "Help" },
-      { label: "Help: Keyboard Shortcuts", action: () => notify("Cmd+K launcher, Cmd+Space terminal, window dots control close/min/max") }
+      { label: "Keyboard Shortcuts", action: () => notify("Cmd+K launcher, Cmd+Space terminal, window dots control close/min/max") }
     ];
   }
 
@@ -764,10 +765,10 @@ function makeMenuBar() {
   document.addEventListener("click", closeMenu);
   append(left, [mark, activeApp, editMenu, viewMenu, goMenu, windowMenu, helpMenu]);
 
-  const right = el("div", "flex items-center justify-end gap-2 text-white/70 max-sm:gap-1");
-  const search = append(el("button", "grid h-7 w-7 place-items-center rounded-full border border-white/10 bg-white/8 text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:h-9 max-sm:w-9", { type: "button", title: "Search" }), [icon("ph-magnifying-glass", "text-base")]);
+  const right = el("div", "flex items-center justify-end gap-2 text-white/70");
+  const search = append(el("button", "grid h-7 w-7 place-items-center rounded-full border border-white/10 bg-white/8 text-white/75 transition hover:border-white/20 hover:bg-white/15", { type: "button", title: "Search" }), [icon("ph-magnifying-glass", "text-base")]);
   bindButtonAction(search, openLauncher);
-  const accessibility = append(el("button", "grid h-7 w-7 place-items-center rounded-full border border-white/10 bg-white/8 text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:h-9 max-sm:w-9", { type: "button", title: "Accessibility Keyboard" }), [icon("ph-keyboard", "text-base")]);
+  const accessibility = append(el("button", "grid h-7 w-7 place-items-center rounded-full border border-white/10 bg-white/8 text-white/75 transition hover:border-white/20 hover:bg-white/15", { type: "button", title: "Accessibility Keyboard" }), [icon("ph-keyboard", "text-base")]);
   bindButtonAction(accessibility, (event) => {
     event.stopPropagation();
     showMenu(accessibility, [
@@ -779,7 +780,7 @@ function makeMenuBar() {
       { label: "Open Settings", action: () => launchApp("settings") }
     ]);
   });
-  const user = append(el("button", "flex items-center gap-1 rounded-full border border-white/10 bg-white/8 px-2 py-1 text-xs font-semibold text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:grid max-sm:h-9 max-sm:w-9 max-sm:place-items-center max-sm:px-0", { type: "button", title: "blair" }), [icon("ph-user-circle", "text-base"), el("span", "max-sm:hidden", { text: "blair" })]);
+  const user = append(el("button", "flex h-7 items-center gap-1 rounded-full border border-white/10 bg-white/8 px-2 py-1 text-xs font-semibold text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:grid max-sm:place-items-center", { type: "button", title: "blair" }), [icon("ph-user-circle", "text-base"), el("span", "max-sm:hidden", { text: "blair" })]);
   bindButtonAction(user, (event) => {
     event.stopPropagation();
     showMenu(user, [
@@ -793,7 +794,7 @@ function makeMenuBar() {
       { label: "Erase All Content and Settings", action: completeReset }
     ]);
   });
-  const wifi = append(el("button", "flex h-7 items-center gap-1 rounded-full border border-white/10 bg-white/8 px-2 py-1 text-xs font-semibold text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:grid max-sm:h-9 max-sm:w-9 max-sm:place-items-center max-sm:px-0", { type: "button", title: "Connected to BlairFi" }), [icon("ph-wifi-high", "text-base text-cyan-100"), el("span", "max-sm:hidden", { text: "BlairFi" })]);
+  const wifi = append(el("button", "flex h-7 items-center gap-1 rounded-full border border-white/10 bg-white/8 px-2 py-1 text-xs font-semibold text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:grid max-sm:place-items-center", { type: "button", title: "Connected to BlairFi" }), [icon("ph-wifi-high", "text-base text-cyan-100"), el("span", "max-sm:hidden", { text: "BlairFi" })]);
   bindButtonAction(wifi, (event) => {
     event.stopPropagation();
     showMenu(wifi, [
@@ -806,7 +807,7 @@ function makeMenuBar() {
       { label: "Reconnect Wi-Fi", action: () => runJob("Wi-Fi reconnect", "airportd", "renewing link", () => notify("Connected to BlairFi")) }
     ]);
   });
-  const battery = append(el("button", "flex h-7 items-center gap-1 rounded-full border border-white/10 bg-white/8 px-2 py-1 font-mono text-xs text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:h-9 max-sm:w-9 max-sm:justify-center max-sm:px-0", { type: "button", title: "Battery 92%" }), [icon("ph-battery-full", "text-base text-emerald-200"), el("span", "max-sm:hidden", { text: "92%" })]);
+  const battery = append(el("button", "flex h-7 items-center gap-1 rounded-full border border-white/10 bg-white/8 px-2 py-1 font-mono text-xs text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:justify-center", { type: "button", title: "Battery 92%" }), [icon("ph-battery-full", "text-base text-emerald-200"), el("span", "max-sm:hidden", { text: "92%" })]);
   bindButtonAction(battery, (event) => {
     event.stopPropagation();
     showMenu(battery, [
@@ -818,7 +819,7 @@ function makeMenuBar() {
       { label: "Low Power Mode", action: () => notify("Low Power Mode scheduled for later") }
     ]);
   });
-  const clock = el("button", "rounded-md px-2 py-1 font-mono transition hover:bg-white/10 max-sm:py-2 max-sm:text-xs", { type: "button" });
+  const clock = el("button", "rounded-md px-2 py-1 font-mono transition hover:bg-white/10 max-sm:text-xs", { type: "button" });
   bindButtonAction(clock, (event) => {
     event.stopPropagation();
     if (notificationPanel) {
@@ -1302,7 +1303,7 @@ function renderWindows() {
 
 function createWindow(process: ProcessRecord) {
   const app = appRegistry[process.appId];
-  const win = el("article", `${glass} blairos-window pointer-events-auto absolute grid min-h-60 min-w-80 grid-rows-[42px_1fr] overflow-hidden rounded-[22px] max-sm:!min-w-0 max-sm:grid-rows-[48px_1fr] max-sm:rounded-[18px]`);
+  const win = el("article", `${glass} blairos-window pointer-events-auto absolute grid min-h-60 min-w-80 grid-rows-[42px_1fr] overflow-hidden rounded-[22px] max-sm:!min-w-0 max-sm:rounded-[18px]`);
   win.dataset.process = process.id;
   const titlebar = el("header", "window-drag grid cursor-grab touch-none select-none grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-white/15 bg-white/5 px-3");
   titlebar.addEventListener("dblclick", (event) => {
@@ -1310,8 +1311,8 @@ function createWindow(process: ProcessRecord) {
     event.preventDefault();
     toggleMaximizeProcess(process.id);
   });
-  const controls = el("div", "relative z-10 flex gap-2 max-sm:gap-2.5");
-  const controlClass = "h-3.5 w-3.5 rounded-full border border-black/20 transition hover:scale-125 hover:brightness-125 hover:ring-2 hover:ring-white/45 focus:outline-none focus:ring-2 focus:ring-cyan-200/70 max-sm:h-5 max-sm:w-5 max-sm:hover:scale-100";
+  const controls = el("div", "relative z-10 flex gap-2");
+  const controlClass = "h-3.5 w-3.5 rounded-full border border-black/20 transition hover:scale-125 hover:brightness-125 hover:ring-2 hover:ring-white/45 focus:outline-none focus:ring-2 focus:ring-cyan-200/70 max-sm:hover:scale-100";
   const close = el("button", `${controlClass} bg-[#ff5f57] hover:shadow-[0_0_12px_rgba(255,95,87,.7)]`, { type: "button", title: "close" });
   const min = el("button", `${controlClass} bg-[#ffbd2e] hover:shadow-[0_0_12px_rgba(255,189,46,.7)]`, { type: "button", title: "minimize to Dock" });
   const max = el("button", `${controlClass} bg-[#28c840] hover:shadow-[0_0_12px_rgba(40,200,64,.7)]`, { type: "button", title: "maximize" });

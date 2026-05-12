@@ -82,7 +82,6 @@ a {
 
 @media (max-width: 720px) {
   :root {
-    --menu-height: 42px;
     --dock-height: 76px;
     --mobile-bottom-height: var(--dock-height);
   }
