@@ -22,7 +22,7 @@ import {
   toggleMaximizeProcess,
   updateProcess
 } from "./processes";
-import type { AppId, AppContext, ProcessRecord } from "./types";
+import type { AppId, AppContext, NotifyAction, ProcessRecord } from "./types";
 import type { FsNode } from "../data/filesystem";
 
 type SearchItem = {
@@ -37,11 +37,18 @@ type SearchItem = {
 type MenuItem = {
   label: string;
   shortcut?: string;
-  action: () => void;
+  action?: () => void;
 };
 
 const root = document.getElementById("os-root")!;
 if (!root) throw new Error("missing #os-root");
+
+type BootWindow = Window & { __blairosBootSeen?: boolean };
+type BootStep = {
+  label: string;
+  detail: string | (() => string);
+  action?: () => string | void;
+};
 
 let windowLayer: HTMLElement;
 let dock: HTMLElement;
@@ -65,12 +72,22 @@ function isSmallScreen() {
   return window.matchMedia("(max-width: 720px)").matches;
 }
 
-function notify(message: string) {
+function notify(message: string, action?: NotifyAction) {
   addNotification(message);
   logEvent("notification", message);
   const existing = document.querySelector("[data-toast]");
   existing?.remove();
-  const toast = el("div", "fixed bottom-[calc(var(--dock-height)+16px)] right-4 z-[9500] max-w-[min(420px,calc(100vw-28px))] rounded-2xl border border-white/15 bg-slate-950/85 px-4 py-3 text-sm text-white/70 shadow-2xl backdrop-blur-2xl", { text: message });
+  const toast = el("div", "fixed bottom-[calc(var(--dock-height)+16px)] right-4 z-[9500] grid max-w-[min(420px,calc(100vw-28px))] gap-3 rounded-2xl border border-white/15 bg-slate-950/85 px-4 py-3 text-sm text-white/70 shadow-2xl backdrop-blur-2xl");
+  toast.append(el("span", "break-words", { text: message }));
+  if (action) {
+    const actionButton = el("button", "justify-self-start rounded-xl border border-cyan-200/25 bg-cyan-300/15 px-3 py-1.5 text-xs font-bold text-cyan-100 transition hover:bg-cyan-300/25", { type: "button", text: action.label });
+    bindButtonAction(actionButton, (event) => {
+      event.stopPropagation();
+      toast.remove();
+      action.action();
+    });
+    toast.append(actionButton);
+  }
   toast.dataset.toast = "true";
   document.body.append(toast);
   window.clearTimeout(toastTimer);
@@ -263,24 +280,24 @@ function showNotificationCenter(anchor?: HTMLElement) {
   closeContextMenu();
   const items = notifications.get();
   const activeJobs = jobs.get();
-  notificationPanel = el("aside", "fixed right-3 top-[calc(var(--menu-height)+8px)] z-[9400] grid max-h-[min(680px,calc(100vh-90px))] w-[min(390px,calc(100vw-24px))] grid-rows-[auto_1fr_auto] gap-3 overflow-hidden rounded-[30px] border border-white/15 bg-slate-950/90 p-4 text-white shadow-2xl shadow-black/45 backdrop-blur-2xl");
-  append(notificationPanel, [el("h2", "text-2xl font-black tracking-[-0.07em]", { text: "Notification Center" })]);
-  const list = el("div", "grid gap-2 overflow-auto pr-1");
+  notificationPanel = el("aside", "fixed right-3 top-[calc(var(--menu-height)+8px)] z-[9400] grid max-h-[min(680px,calc(100vh-90px))] w-[min(390px,calc(100vw-24px))] max-w-[calc(100vw-24px)] grid-rows-[auto_1fr_auto] gap-3 overflow-x-hidden overflow-y-hidden rounded-[30px] border border-white/15 bg-slate-950/90 p-4 text-white shadow-2xl shadow-black/45 backdrop-blur-2xl");
+  append(notificationPanel, [el("h2", "min-w-0 truncate text-2xl font-black tracking-[-0.07em]", { text: "Notification Center" })]);
+  const list = el("div", "grid min-w-0 gap-2 overflow-x-hidden overflow-y-auto pr-1");
   activeJobs.forEach((job) => {
     const progress = el("span", "block h-full rounded-full bg-cyan-300");
     progress.style.width = `${job.progress}%`;
-    list.append(append(el("article", "rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-3"), [
-      el("p", "font-bold", { text: job.name }),
-      el("p", "text-xs text-white/45", { text: `${job.app} - ${job.state} - ${job.detail ?? ""}` }),
+    list.append(append(el("article", "min-w-0 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-3"), [
+      el("p", "break-words font-bold", { text: job.name }),
+      el("p", "break-words text-xs text-white/45", { text: `${job.app} - ${job.state} - ${job.detail ?? ""}` }),
       append(el("div", "mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"), [progress])
     ]));
   });
-  items.forEach((item) => list.append(append(el("article", "rounded-2xl border border-white/10 bg-white/8 p-3"), [
-    el("p", "text-sm text-white/80", { text: item.message }),
-    el("p", "mt-1 font-mono text-[0.68rem] text-white/35", { text: item.time })
+  items.forEach((item) => list.append(append(el("article", "min-w-0 rounded-2xl border border-white/10 bg-white/8 p-3"), [
+    el("p", "break-words text-sm text-white/80", { text: item.message }),
+    el("p", "mt-1 break-words font-mono text-[0.68rem] text-white/35", { text: item.time })
   ])));
-  if (!activeJobs.length && !items.length) list.append(el("p", "rounded-2xl border border-white/10 bg-white/8 p-4 text-white/50", { text: "No notifications" }));
-  const footer = el("div", "flex gap-2");
+  if (!activeJobs.length && !items.length) list.append(el("p", "min-w-0 rounded-2xl border border-white/10 bg-white/8 p-4 text-white/50", { text: "No notifications" }));
+  const footer = el("div", "flex min-w-0 gap-2");
   append(footer, [el("button", "rounded-2xl bg-white/10 px-3 py-2 text-xs font-bold hover:bg-white/20", { type: "button", text: "Clear" }), el("button", "rounded-2xl bg-cyan-300 px-3 py-2 text-xs font-bold text-slate-950 hover:bg-cyan-200", { type: "button", text: "Open Console" })]);
   bindButtonAction(footer.firstElementChild as HTMLButtonElement, () => { clearNotifications(); closeNotificationCenter(); });
   bindButtonAction(footer.lastElementChild as HTMLButtonElement, () => { launchApp("console"); closeNotificationCenter(); });
@@ -416,10 +433,12 @@ function showContextMenu(x: number, y: number, items: MenuItem[]) {
   closeContextMenu();
   contextMenu = el("div", "fixed z-[9300] grid min-w-56 gap-1 rounded-2xl border border-white/15 bg-slate-950/92 p-2 text-sm text-white shadow-2xl shadow-black/45 backdrop-blur-2xl max-sm:max-h-[calc(100dvh-16px)] max-sm:w-[calc(100vw-16px)] max-sm:overflow-auto");
   items.forEach((item) => {
+    const action = item.action;
+    if (!action) return;
     const row = el("button", "grid grid-cols-[1fr_auto] items-center gap-4 rounded-xl px-3 py-2 text-left text-white/78 transition hover:bg-white/10 hover:text-white", { type: "button" });
     append(row, [el("span", "truncate", { text: item.label }), el("span", "font-mono text-xs text-white/35", { text: item.shortcut || "" })]);
     bindButtonAction(row, () => {
-      item.action();
+      action();
       closeContextMenu();
     });
     contextMenu?.append(row);
@@ -442,37 +461,76 @@ function appContext(process: ProcessRecord): AppContext {
   };
 }
 
+function restoreOrLaunchSession() {
+  if (restoreSession()) return "restored saved windows and focus state";
+  launchApp("browser", { url: "https://blairhudson.com/agile-weekend/" });
+  launchApp("terminal");
+  launchApp("browser", { url: "https://blairhudson.com/sbx-agents/" });
+  const browserProcess = processes.get().at(-1);
+  if (browserProcess?.appId === "browser") {
+    updateProcess(browserProcess.id, { x: Math.max(24, window.innerWidth - browserProcess.width - 40), y: 72 });
+  }
+  launchApp("files", { path: "/Home/blair/Links" });
+  return "no saved session, launched Browser, Terminal, and Links";
+}
+
+function legacyRestoreOrLaunchSession() {
+  if (!restoreSession()) {
+    launchApp("browser", { url: "https://blairhudson.com/agile-weekend/" });
+    launchApp("terminal");
+    launchApp("browser", { url: "https://blairhudson.com/sbx-agents/" });
+    const browserProcess = processes.get().at(-1);
+    if (browserProcess?.appId === "browser") {
+      updateProcess(browserProcess.id, { x: Math.max(24, window.innerWidth - browserProcess.width - 40), y: 72 });
+    }
+    launchApp("files", { path: "/Home/blair/Links" });
+  }
+}
+
 function makeBoot() {
+  const bootWindow = window as BootWindow;
+  if (bootWindow.__blairosBootSeen) {
+    legacyRestoreOrLaunchSession();
+    return;
+  }
+  bootWindow.__blairosBootSeen = true;
   const boot = el("div", "fixed inset-0 z-[9999] grid content-end gap-4 bg-[radial-gradient(circle_at_22%_18%,rgba(128,247,255,.16),transparent_28%),linear-gradient(180deg,rgba(3,5,10,.98),rgba(6,8,16,.94))] p-[clamp(22px,5vw,56px)] transition duration-500");
   const logo = el("h1", "m-0 font-mono text-[clamp(2.2rem,8vw,7rem)] font-black tracking-[-.08em]", { text: "BlairOS" });
-  const log = el("div", "min-h-36 w-[min(680px,100%)] font-mono text-sm text-white/65");
+  const log = el("div", "min-h-56 w-[min(760px,100%)] font-mono text-sm text-white/65 max-sm:min-h-72 max-sm:text-xs");
   const bar = el("div", "h-2 w-[min(680px,100%)] overflow-hidden rounded-full border border-white/15 bg-white/10");
   const fill = el("span", "block h-full rounded-full bg-gradient-to-r from-cyan-300 to-fuchsia-300 transition-all duration-200");
   bar.append(fill);
   append(boot, [logo, log, bar]);
   root.append(boot);
 
-  const lines = ["mount /Desktop", "load /Applications", "hydrate /bin", "start windowserver", "ready"];
-  lines.forEach((line, index) => {
+  const steps: BootStep[] = [
+    { label: "kernel", detail: () => `root online at ${window.innerWidth}x${window.innerHeight}` },
+    { label: "settings", detail: () => `dock ${settings.get().dockSize}, ${settings.get().clock24h ? "24h" : "12h"} clock, wallpaper sync` },
+    { label: "filesystem", detail: () => `${desktopNodes().length} desktop nodes, /Applications, /bin, Trash mounted` },
+    { label: "metadata", detail: "favorites, tags, comments, recents, and notifications loaded" },
+    { label: "launcher", detail: () => `${searchableNodes().length} files plus ${appManifests.length} apps indexed` },
+    { label: "windowserver", detail: "menu bar, desktop layer, dock, windows, and context menus attached" },
+    { label: "input", detail: `global shortcuts active, keyboard mode ${keyboardMode}` },
+    { label: "session", detail: "checking saved process table", action: restoreOrLaunchSession },
+    { label: "ready", detail: () => `${processes.get().filter((item) => !item.minimized).length} windows visible` }
+  ];
+  steps.forEach((step, index) => {
     window.setTimeout(() => {
-      log.append(el("p", "mb-1", { text: `[ok] ${line}` }));
-      fill.style.width = `${((index + 1) / lines.length) * 100}%`;
-      if (index === lines.length - 1) {
+      const actionDetail = step.action?.();
+      const detail = actionDetail || (typeof step.detail === "function" ? step.detail() : step.detail);
+      append(log, [
+        append(el("p", "mb-1 grid grid-cols-[7.5rem_minmax(0,1fr)] gap-3 max-sm:grid-cols-[5.5rem_minmax(0,1fr)]", {}), [
+          el("span", "text-cyan-200", { text: `[ok] ${step.label}` }),
+          el("span", "truncate text-white/55", { text: detail })
+        ])
+      ]);
+      fill.style.width = `${((index + 1) / steps.length) * 100}%`;
+      if (index === steps.length - 1) {
         window.setTimeout(() => {
           boot.classList.add("opacity-0", "invisible", "pointer-events-none");
-          if (!restoreSession()) {
-            launchApp("browser", { url: "https://blairhudson.com/agile-weekend/" });
-            launchApp("terminal");
-            launchApp("browser", { url: "https://blairhudson.com/sbx-agents/" });
-            const browserProcess = processes.get().at(-1);
-            if (browserProcess?.appId === "browser") {
-              updateProcess(browserProcess.id, { x: Math.max(24, window.innerWidth - browserProcess.width - 40), y: 72 });
-            }
-            launchApp("files", { path: "/Home/blair/Links" });
-          }
         }, 420);
       }
-    }, 180 + index * 190);
+    }, 140 + index * 170);
   });
 }
 
@@ -519,10 +577,14 @@ function makeMenuBar() {
     openDropdown.style.left = isSmallScreen() ? "8px" : `${Math.max(8, Math.min(rect.left, window.innerWidth - 240))}px`;
     openDropdown.style.top = `${rect.bottom + 6}px`;
     items.forEach((item) => {
+      if (!item.action) {
+        openDropdown?.append(el("div", "px-3 pb-1 pt-2 text-[0.65rem] font-black uppercase tracking-[0.18em] text-white/35", { text: item.label }));
+        return;
+      }
       const row = el("button", "grid grid-cols-[1fr_auto] items-center gap-4 rounded-xl px-3 py-2 text-left text-white/78 transition hover:bg-white/10 hover:text-white", { type: "button" });
       append(row, [el("span", "truncate", { text: item.label }), el("span", "font-mono text-xs text-white/35", { text: item.shortcut || "" })]);
       bindButtonAction(row, () => {
-        item.action();
+        item.action?.();
         closeMenu();
       });
       openDropdown?.append(row);
@@ -552,15 +614,20 @@ function makeMenuBar() {
     const process = focusedProcess();
     const appName = process ? appRegistry[process.appId].name : "Finder";
     return [
+      { label: "App" },
       { label: `${appName}: About`, action: () => process?.appId === "about" ? notify("Already viewing About BlairOS") : launchApp("about") },
       { label: `${appName}: New Window`, action: () => process ? launchApp(process.appId, process.data ?? {}) : launchApp("files", { path: "/Home/blair" }) },
+      { label: "Edit" },
       { label: "Edit: Copy", shortcut: "Cmd+C", action: () => notify("Copy") },
       { label: "Edit: Paste", shortcut: "Cmd+V", action: () => notify("Paste") },
+      { label: "Navigation" },
       { label: "View: Open Launcher", shortcut: "Cmd+K", action: openLauncher },
       { label: "Go: Desktop", action: () => launchApp("files", { path: "/Desktop" }) },
       { label: "Go: Applications", action: () => launchApp("files", { path: "/Applications" }) },
+      { label: "Window" },
       { label: "Window: Minimize", shortcut: "Cmd+M", action: () => { if (process) minimizeProcess(process.id); } },
       { label: "Window: Restore Minimized", action: () => processes.get().filter((item) => item.minimized).forEach((item) => restoreProcess(item.id)) },
+      { label: "Help" },
       { label: "Help: Keyboard Shortcuts", action: () => notify("Cmd+K launcher, Cmd+Space terminal, window dots control close/min/max") }
     ];
   }
@@ -627,9 +694,11 @@ function makeMenuBar() {
     event.stopPropagation();
     const recentItems = getRecentItems().slice(0, 5).map((item) => ({ label: item.title, action: () => runRecent(item) }));
     showMenu(mark, [
+      { label: "System" },
       { label: "About BlairOS", action: () => launchApp("about") },
       { label: "System Settings", shortcut: "Cmd+,", action: () => launchApp("settings") },
       { label: "Launcher", shortcut: "Cmd+K", action: openLauncher },
+      { label: "Recent" },
       ...recentItems,
       { label: "Clear Recent Items", action: clearRecentItems },
       { label: "Sleep", action: () => notify("Display sleeping. Move pointer or press key to wake.") }
@@ -645,15 +714,21 @@ function makeMenuBar() {
     const process = focusedProcess();
     const appName = process ? appRegistry[process.appId].name : "Finder";
     showMenu(activeApp, process ? [
+      { label: "App" },
       { label: `About ${appName}`, action: () => process.appId === "about" ? notify("Already viewing About BlairOS") : launchApp("about") },
       { label: `New ${appName} Window`, action: () => launchApp(process.appId, process.data ?? {}) },
+      { label: "File" },
       ...fileItems(),
+      { label: "Window" },
       { label: "Minimize", shortcut: "Cmd+M", action: () => minimizeProcess(process.id) },
       { label: process.maximized ? "Exit Full Window" : "Full Window", action: () => toggleMaximizeProcess(process.id) },
       { label: "Close Window", shortcut: "Cmd+W", action: () => closeProcess(process.id) }
     ] : [
+      { label: "System" },
       { label: "About BlairOS", action: () => launchApp("about") },
+      { label: "File" },
       ...fileItems(),
+      { label: "Navigation" },
       { label: "Open Launcher", shortcut: "Cmd+K", action: openLauncher },
       { label: "Show Desktop", action: () => launchApp("files", { path: "/Desktop" }) }
     ]);
@@ -696,8 +771,10 @@ function makeMenuBar() {
   bindButtonAction(accessibility, (event) => {
     event.stopPropagation();
     showMenu(accessibility, [
+      { label: "Keyboard" },
       { label: keyboardMode === "os" ? "Use Browser Native Keyboard" : "Use BlairOS Keyboard", action: toggleKeyboardMode },
       { label: osKeyboardPinned ? "Hide Accessibility Keyboard" : "Show Accessibility Keyboard", action: toggleOsKeyboardPinned },
+      { label: "Shortcuts" },
       { label: "Keyboard Shortcuts", action: showKeyboardShortcutsPanel },
       { label: "Open Settings", action: () => launchApp("settings") }
     ]);
@@ -706,28 +783,36 @@ function makeMenuBar() {
   bindButtonAction(user, (event) => {
     event.stopPropagation();
     showMenu(user, [
+      { label: "Account" },
       { label: "Open Profile", action: () => launchApp("about") },
       { label: "Home Folder", action: () => launchApp("files", { path: "/Home/blair" }) },
+      { label: "System" },
       { label: "System Settings", shortcut: "Cmd+,", action: () => launchApp("settings") },
       { label: "Start Screensaver", action: () => startScreensaver() },
       { label: "Lock Screen", action: showLockScreen },
       { label: "Erase All Content and Settings", action: completeReset }
     ]);
   });
-  const wifi = append(el("button", "grid h-7 w-7 place-items-center rounded-full border border-white/10 bg-white/8 text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:h-9 max-sm:w-9", { type: "button", title: "Wi-Fi connected" }), [icon("ph-wifi-high", "text-base")]);
+  const wifi = append(el("button", "flex h-7 items-center gap-1 rounded-full border border-white/10 bg-white/8 px-2 py-1 text-xs font-semibold text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:grid max-sm:h-9 max-sm:w-9 max-sm:place-items-center max-sm:px-0", { type: "button", title: "Connected to BlairFi" }), [icon("ph-wifi-high", "text-base text-cyan-100"), el("span", "max-sm:hidden", { text: "BlairFi" })]);
   bindButtonAction(wifi, (event) => {
     event.stopPropagation();
     showMenu(wifi, [
+      { label: "Connected to BlairFi", action: () => notify("Connected to BlairFi") },
+      { label: "Available Network" },
+      { label: "The Promised LAN", action: () => notify("The Promised LAN is out of range") },
+      { label: "Pretty Fly for a Wi-Fi", action: () => notify("Pretty Fly for a Wi-Fi declined politely") },
       { label: "Open Network Utility", action: () => launchApp("networkUtility") },
       { label: "Run Diagnostics", action: () => runJob("Network diagnostics", "networkd", "checking signal and DNS", () => launchApp("networkUtility", { tool: "ping" })) },
-      { label: "Reconnect Wi-Fi", action: () => runJob("Wi-Fi reconnect", "airportd", "renewing link", () => notify("Wi-Fi connected")) }
+      { label: "Reconnect Wi-Fi", action: () => runJob("Wi-Fi reconnect", "airportd", "renewing link", () => notify("Connected to BlairFi")) }
     ]);
   });
   const battery = append(el("button", "flex h-7 items-center gap-1 rounded-full border border-white/10 bg-white/8 px-2 py-1 font-mono text-xs text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:h-9 max-sm:w-9 max-sm:justify-center max-sm:px-0", { type: "button", title: "Battery 92%" }), [icon("ph-battery-full", "text-base text-emerald-200"), el("span", "max-sm:hidden", { text: "92%" })]);
   bindButtonAction(battery, (event) => {
     event.stopPropagation();
     showMenu(battery, [
+      { label: "Power" },
       { label: "Battery: 92%", action: () => notify("Battery 92%, healthy") },
+      { label: "Utilities" },
       { label: "Open System Profiler", action: () => launchApp("systemProfiler") },
       { label: "Open Activity Monitor", action: () => launchApp("activityMonitor") },
       { label: "Low Power Mode", action: () => notify("Low Power Mode scheduled for later") }
@@ -904,7 +989,57 @@ function animateWindowAction(win: HTMLElement, frames: Keyframe[], done: () => v
     done();
     return;
   }
+  if (isSmallScreen()) {
+    const from = frames[0] as Record<string, string | number>;
+    const to = frames[frames.length - 1] as Record<string, string | number>;
+    win.getAnimations().forEach((animation) => animation.cancel());
+    win.dataset.windowAnimating = "true";
+    win.style.transition = "none";
+    win.style.willChange = "transform, opacity, filter";
+    if (from.opacity !== undefined) win.style.opacity = String(from.opacity);
+    if (from.transform !== undefined) win.style.transform = String(from.transform);
+    if (from.filter !== undefined) win.style.filter = String(from.filter);
+    requestAnimationFrame(() => {
+      win.style.transition = "transform 180ms cubic-bezier(.2,.8,.2,1), opacity 160ms ease, filter 160ms ease";
+      if (to.opacity !== undefined) win.style.opacity = String(to.opacity);
+      if (to.transform !== undefined) win.style.transform = String(to.transform);
+      if (to.filter !== undefined) win.style.filter = String(to.filter);
+      window.setTimeout(() => {
+        win.style.willChange = "";
+        delete win.dataset.windowAnimating;
+        done();
+      }, 190);
+    });
+    return;
+  }
   void win.animate(frames, { duration: 150, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" }).finished.finally(done);
+}
+
+function animateMaximizeTap(win: HTMLElement) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (isSmallScreen()) {
+    win.getAnimations().forEach((animation) => animation.cancel());
+    win.dataset.windowAnimating = "true";
+    win.style.transition = "none";
+    win.style.willChange = "transform, filter";
+    win.style.transform = "scale(1)";
+    win.style.filter = "brightness(1)";
+    requestAnimationFrame(() => {
+      win.style.transition = "transform 160ms cubic-bezier(.2,.8,.2,1), filter 160ms ease";
+      win.style.transform = "scale(.965)";
+      win.style.filter = "brightness(1.16)";
+      window.setTimeout(() => {
+        win.style.transform = "scale(1)";
+        win.style.filter = "brightness(1)";
+        window.setTimeout(() => {
+          win.style.willChange = "";
+          delete win.dataset.windowAnimating;
+        }, 170);
+      }, 90);
+    });
+    return;
+  }
+  win.animate([{ transform: "scale(1)" }, { transform: "scale(.985)" }, { transform: "scale(1)" }], { duration: 140, easing: "cubic-bezier(.2,.8,.2,1)" });
 }
 
 function setNativeKeyboardMode(win: HTMLElement, enabled: boolean) {
@@ -1078,7 +1213,7 @@ function naturalActions(query: string): SearchItem[] {
     if (/lock|sleep/.test(q)) actions.push({ id: "action:lock", title: "Lock screen", subtitle: "Sleep display", icon: "ph-lock", kind: "action", action: showLockScreen });
     if (/console|logs|log/.test(q)) actions.push({ id: "action:logs", title: "Open Console", subtitle: "System logs", icon: "ph-list-magnifying-glass", kind: "action", action: () => launchApp("console") });
     if (/activity|process|jobs/.test(q)) actions.push({ id: "action:activity", title: "Open Activity Monitor", subtitle: "Processes and jobs", icon: "ph-pulse", kind: "action", action: () => launchApp("activityMonitor") });
-    if (/open old|old homepage/.test(q)) actions.push({ id: "action:old-home", title: "Open old homepage", subtitle: "/old-homepage.html", icon: "ph-file-html", kind: "action", action: () => launchApp("browser", { url: "/old-homepage.html" }) });
+    if (/open old|old homepage/.test(q)) actions.push({ id: "action:old-home", title: "Open old homepage", subtitle: "blairos://Desktop/old-homepage.html", icon: "ph-file-html", kind: "action", action: () => launchApp("browser", { url: "blairos://Desktop/old-homepage.html" }) });
   if (/find projects|projects/.test(q)) actions.push({ id: "action:projects", title: "Find projects", subtitle: "/Projects", icon: "ph-folder", kind: "action", action: () => launchApp("files", { path: "/Projects" }) });
   if (/email|mail blair|contact/.test(q)) actions.push({ id: "action:email", title: "Email Blair", subtitle: "Open Mail", icon: "ph-envelope-simple", kind: "action", action: () => launchApp("mail") });
   if (/git|repo|commit/.test(q)) actions.push({ id: "action:git", title: "Open Git", subtitle: "Repos and commits", icon: "ph-git-branch", kind: "action", action: () => launchApp("git") });
@@ -1167,9 +1302,14 @@ function renderWindows() {
 
 function createWindow(process: ProcessRecord) {
   const app = appRegistry[process.appId];
-  const win = el("article", `${glass} blairos-window pointer-events-auto absolute grid min-h-60 min-w-80 grid-rows-[42px_1fr] overflow-hidden rounded-[22px] max-sm:relative max-sm:!left-auto max-sm:!top-auto max-sm:!h-[calc(100dvh-var(--menu-height)-var(--mobile-bottom-height)-12px)] max-sm:!w-full max-sm:!min-w-0 max-sm:grid-rows-[48px_1fr] max-sm:rounded-[18px]`);
+  const win = el("article", `${glass} blairos-window pointer-events-auto absolute grid min-h-60 min-w-80 grid-rows-[42px_1fr] overflow-hidden rounded-[22px] max-sm:!min-w-0 max-sm:grid-rows-[48px_1fr] max-sm:rounded-[18px]`);
   win.dataset.process = process.id;
   const titlebar = el("header", "window-drag grid cursor-grab touch-none select-none grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-white/15 bg-white/5 px-3");
+  titlebar.addEventListener("dblclick", (event) => {
+    if ((event.target as HTMLElement).closest("button")) return;
+    event.preventDefault();
+    toggleMaximizeProcess(process.id);
+  });
   const controls = el("div", "relative z-10 flex gap-2 max-sm:gap-2.5");
   const controlClass = "h-3.5 w-3.5 rounded-full border border-black/20 transition hover:scale-125 hover:brightness-125 hover:ring-2 hover:ring-white/45 focus:outline-none focus:ring-2 focus:ring-cyan-200/70 max-sm:h-5 max-sm:w-5 max-sm:hover:scale-100";
   const close = el("button", `${controlClass} bg-[#ff5f57] hover:shadow-[0_0_12px_rgba(255,95,87,.7)]`, { type: "button", title: "close" });
@@ -1188,14 +1328,12 @@ function createWindow(process: ProcessRecord) {
   });
   bindButtonAction(max, (event) => {
     event.stopPropagation();
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      win.animate([{ transform: "scale(1)" }, { transform: "scale(.985)" }, { transform: "scale(1)" }], { duration: 140, easing: "cubic-bezier(.2,.8,.2,1)" });
-    }
+    animateMaximizeTap(win);
     toggleMaximizeProcess(process.id);
   });
   append(controls, [close, min, max]);
   const titleLabel = append(el("div", "truncate text-sm font-bold text-white/75", { "data-window-title": "true" }), [icon(process.icon, "mr-2 inline text-lg text-cyan-200"), process.title]);
-  append(titlebar, [controls, titleLabel, el("span", "font-mono text-[0.68rem] text-white/35 max-sm:hidden", { text: process.id })]);
+  append(titlebar, [controls, titleLabel, el("span", "w-3", { "aria-hidden": "true" })]);
   const content = el("div", "relative min-h-0 overflow-auto");
   content.append(app.render(appContext(process)));
   if (process.appId === "browser") {
@@ -1214,15 +1352,23 @@ function createWindow(process: ProcessRecord) {
 }
 
 function syncWindow(win: HTMLElement, process: ProcessRecord, isFocused: boolean) {
-  if (!process.minimized) {
+  if (!process.minimized && !win.dataset.windowAnimating) {
     win.getAnimations().forEach((animation) => animation.cancel());
+    win.style.transition = "";
+    win.style.willChange = "";
     win.style.opacity = "";
     win.style.filter = "";
-    win.style.transform = isSmallScreen() && win.dataset.mobileDragX && win.dataset.mobileDragY
-      ? `translate(${win.dataset.mobileDragX}px, ${win.dataset.mobileDragY}px)`
-      : "";
+    if (process.maximized) {
+      delete win.dataset.mobileDragX;
+      delete win.dataset.mobileDragY;
+      win.style.transform = "";
+    } else {
+      win.style.transform = isSmallScreen() && win.dataset.mobileDragX && win.dataset.mobileDragY
+        ? `translate(${win.dataset.mobileDragX}px, ${win.dataset.mobileDragY}px)`
+        : "";
+    }
   }
-  win.classList.toggle("hidden", process.minimized || (isSmallScreen() && !isFocused));
+  win.classList.toggle("hidden", process.minimized);
   win.classList.toggle("ring-1", isFocused);
   win.classList.toggle("ring-cyan-200/35", isFocused);
   win.querySelector<HTMLElement>("[data-focus-shield]")?.classList.toggle("hidden", isFocused);
@@ -1230,11 +1376,13 @@ function syncWindow(win: HTMLElement, process: ProcessRecord, isFocused: boolean
   if (titleLabel) titleLabel.replaceChildren(icon(process.icon, "mr-2 inline text-lg text-cyan-200"), process.title);
   win.style.zIndex = String(process.z);
   if (process.maximized) {
-    win.style.left = "8px";
-    win.style.top = "8px";
-    win.style.width = "calc(100% - 16px)";
-    win.style.height = "calc(100% - 16px)";
+    win.style.borderRadius = "0";
+    win.style.left = "0";
+    win.style.top = "0";
+    win.style.width = "100%";
+    win.style.height = "calc(100% - var(--mobile-bottom-height))";
   } else {
+    win.style.borderRadius = "";
     win.style.left = `${process.x}px`;
     win.style.top = `${process.y}px`;
     win.style.width = `${process.width}px`;
@@ -1250,7 +1398,22 @@ function attachInteract(win: HTMLElement, processId: string) {
       listeners: {
         move(event) {
           const process = processes.get().find((item) => item.id === processId);
-          if (!process || process.maximized) return;
+          if (!process) return;
+          if (process.maximized) {
+            delete win.dataset.mobileDragX;
+            delete win.dataset.mobileDragY;
+            win.style.transform = "";
+            const nextWidth = Math.min(process.width, Math.max(320, window.innerWidth - 96));
+            const grabRatio = Math.max(0.15, Math.min(0.85, event.clientX / Math.max(1, window.innerWidth)));
+            updateProcess(processId, {
+              maximized: false,
+              width: nextWidth,
+              height: Math.min(process.height, Math.max(240, window.innerHeight - 120)),
+              x: Math.round(event.clientX - nextWidth * grabRatio),
+              y: Math.max(8, Math.round(event.clientY - 22))
+            });
+            return;
+          }
           if (isSmallScreen()) {
             const x = Number(win.dataset.mobileDragX ?? 0) + event.dx;
             const y = Number(win.dataset.mobileDragY ?? 0) + event.dy;

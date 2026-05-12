@@ -32,7 +32,9 @@ export const trashManifest: AppManifest = {
         const restore = el("button", `${subtleButton} max-sm:min-h-11`, { type: "button", text: "Restore" });
         bindAction(restore, () => {
           const restoredPath = restoreNode(item.path);
-          if (restoredPath.startsWith("/") && findNode(restoredPath)) context.notify(`${item.name} restored to ${restoredPath}`);
+          if (restoredPath.startsWith("/") && findNode(restoredPath)) {
+            context.notify(`${item.name} restored to ${restoredPath}`, { label: "Go to File", action: () => context.launchApp("files", { path: restoredPath }) });
+          }
           else context.notify(`Restore failed: ${restoredPath}`);
           render();
         });

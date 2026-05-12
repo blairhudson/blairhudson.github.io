@@ -28,6 +28,7 @@ export function append(parent: HTMLElement, children: Array<HTMLElement | string
 
 export function bindButtonAction<T extends HTMLElement>(node: T, onClick: (event: Event) => void) {
   let skipSyntheticClick = false;
+  let skipSyntheticClickTimer: number | undefined;
   node.addEventListener("pointerdown", (event) => {
     if (event.pointerType !== "mouse") event.stopPropagation();
   });
@@ -37,15 +38,18 @@ export function bindButtonAction<T extends HTMLElement>(node: T, onClick: (event
     event.preventDefault();
     event.stopPropagation();
     skipSyntheticClick = true;
+    window.clearTimeout(skipSyntheticClickTimer);
     onClick(event);
-    window.setTimeout(() => {
+    skipSyntheticClickTimer = window.setTimeout(() => {
       skipSyntheticClick = false;
-    });
+    }, 500);
   });
   node.addEventListener("click", (event) => {
     if (skipSyntheticClick) {
       event.preventDefault();
       event.stopPropagation();
+      window.clearTimeout(skipSyntheticClickTimer);
+      skipSyntheticClick = false;
       return;
     }
     onClick(event);

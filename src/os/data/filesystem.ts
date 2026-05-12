@@ -403,7 +403,7 @@ AI and software engineering leader building enterprise-scale generative AI, data
       type: "trash",
       icon: "ph-trash",
       children: [
-        { id: "trash-old", name: "old-homepage.html", path: "/Trash/old-homepage.html", originalPath: "/Desktop/old-homepage.html", type: "link", icon: "ph-file-html", href: "/old-homepage.html", body: "Recovered BlairOS v1 homepage." },
+        { id: "trash-old", name: "old-homepage.html", path: "/Trash/old-homepage.html", originalPath: "/Desktop/old-homepage.html", type: "link", icon: "ph-file-html", href: "blairos://Desktop/old-homepage.html", body: "Recovered BlairOS v1 homepage." },
         { id: "trash-draft", name: "draft-that-got-too-corporate.txt", path: "/Trash/draft-that-got-too-corporate.txt", type: "document", icon: "ph-file-text", body: "Deleted for sounding too normal." }
       ]
     }

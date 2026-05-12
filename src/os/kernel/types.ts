@@ -47,7 +47,12 @@ export type AppContext = {
   updateTitle: (title: string) => void;
   openExternal: (href: string) => void;
   openNode: (node: FsNode) => void;
-  notify: (message: string) => void;
+  notify: (message: string, action?: NotifyAction) => void;
+};
+
+export type NotifyAction = {
+  label: string;
+  action: () => void;
 };
 
 export type AppManifest = {

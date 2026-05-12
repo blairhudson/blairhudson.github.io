@@ -18,7 +18,7 @@ export const filesManifest: AppManifest = {
     let path = String(context.process.data?.path || "/Home/blair");
     const root = el("section", "grid h-full grid-cols-[190px_1fr] bg-slate-950/25 text-white max-sm:grid-cols-1");
     const sidebar = el("aside", "border-r border-white/10 p-3 max-sm:hidden");
-    const main = el("main", "min-w-0 overflow-auto p-4");
+    const main = el("main", "min-w-0 overflow-auto p-0");
     let selectedPath = "";
 
     function openPath(nextPath: string) {
@@ -48,27 +48,34 @@ export const filesManifest: AppManifest = {
       renderSidebar();
       main.replaceChildren();
       const node = findNode(path);
-      const header = el("div", "mb-4 flex flex-wrap items-center justify-between gap-3");
+      const chrome = el("div", "sticky top-0 z-20 border-b border-white/10 bg-slate-950/85 p-3 backdrop-blur-2xl max-sm:p-2");
+      const body = el("div", "p-4 max-sm:p-3");
+      const header = el("div", "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2");
+      const upButton = append(el("button", `${subtleButton} flex shrink-0 items-center gap-2 max-sm:px-2 max-sm:py-2 max-sm:text-xs`, { type: "button" }), [
+        icon("ph-arrow-up", "text-base"),
+        el("span", "max-sm:hidden", { text: "Up" })
+      ]) as HTMLButtonElement;
       append(header, [
-        el("div", "font-mono text-sm text-cyan-100", { text: path }),
-        el("button", subtleButton, { type: "button", text: "Up" })
+        el("div", "min-w-0 truncate rounded-2xl border border-white/10 bg-black/25 px-3 py-2 font-mono text-sm text-cyan-100 max-sm:text-xs", { text: path }),
+        upButton
       ]);
-      bindButtonAction(header.lastElementChild as HTMLButtonElement, () => openPath(`${path}/..`));
-      main.append(header);
+      bindButtonAction(upButton, () => openPath(`${path}/..`));
 
-      const toolbar = el("div", "mb-4 flex flex-wrap gap-2");
+      const toolbar = el("div", "mt-2 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] max-sm:gap-1.5");
       const selected = () => (selectedPath ? findNode(selectedPath) : undefined);
-      const action = (label: string, fn: () => void) => {
-        const item = el("button", "rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/20 max-sm:min-h-11 max-sm:px-3.5", { type: "button", text: label });
+      const action = (label: string, iconName: string | undefined, fn: () => void) => {
+        const item = el("button", "flex shrink-0 items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/20 max-sm:min-h-9 max-sm:px-2.5", { type: "button", title: label });
+        if (iconName) item.append(icon(iconName, "text-base text-cyan-100"));
+        item.append(el("span", "whitespace-nowrap", { text: label }));
         bindButtonAction(item, (event) => {
           event.stopPropagation();
           fn();
         });
         toolbar.append(item);
       };
-      action("Open", () => { const node = selected(); if (node) context.openNode(node); });
-      action("Preview", () => { const node = selected(); if (node) context.launchApp("preview", { path: node.path }); });
-      action("Open With", () => {
+      action("Open", "ph-folder-open", () => { const node = selected(); if (node) context.openNode(node); });
+      action("Preview", "ph-eye", () => { const node = selected(); if (node) context.launchApp("preview", { path: node.path }); });
+      action("Open With", undefined, () => {
         const node = selected();
         if (!node) return;
         const app = prompt("Open with", "preview, editor, code, browser, mail")?.toLowerCase();
@@ -78,10 +85,10 @@ export const filesManifest: AppManifest = {
         else if (app === "mail") context.launchApp("mail", { attachment: node.path });
         else context.launchApp("preview", { path: node.path });
       });
-      action("Favorite", () => { if (selectedPath) context.notify(toggleFavorite(selectedPath) ? "Favorited" : "Unfavorited"); render(); });
-      action("Tags", () => { if (selectedPath) { const meta = metadataFor(selectedPath); const value = prompt("Tags", (meta.tags ?? []).join(", ")); if (value !== null) setTags(selectedPath, value.split(",")); render(); } });
-      action("Comment", () => { if (selectedPath) { const meta = metadataFor(selectedPath); const value = prompt("Comment", meta.comment ?? ""); if (value !== null) setComment(selectedPath, value); render(); } });
-      action("Rename", () => {
+      action("Favorite", "ph-star", () => { if (selectedPath) context.notify(toggleFavorite(selectedPath) ? "Favorited" : "Unfavorited"); render(); });
+      action("Tags", "ph-tag", () => { if (selectedPath) { const meta = metadataFor(selectedPath); const value = prompt("Tags", (meta.tags ?? []).join(", ")); if (value !== null) setTags(selectedPath, value.split(",")); render(); } });
+      action("Comment", "ph-chat-circle-text", () => { if (selectedPath) { const meta = metadataFor(selectedPath); const value = prompt("Comment", meta.comment ?? ""); if (value !== null) setComment(selectedPath, value); render(); } });
+      action("Rename", "ph-pencil-simple", () => {
         const node = selected();
         if (!node) return;
         const nextName = prompt("Rename", node.name);
@@ -90,14 +97,24 @@ export const filesManifest: AppManifest = {
         selectedPath = typeof result === "string" && result.startsWith("/") ? result : "";
         if (result && !result.startsWith("/")) context.notify(result);
       });
-      action("Duplicate", () => { const node = selected(); if (node) { const result = duplicateNode(node.path); if (result && !result.startsWith("/")) context.notify(result); } });
-      action("Copy Path", async () => { if (selectedPath) { await navigator.clipboard?.writeText(selectedPath); context.notify("Path copied"); } });
-      action("Move to Trash", () => { const node = selected(); if (node) context.notify(removeNode(node.path) ?? "Moved to Trash"); });
-      if (path === "/Trash") action("Restore", () => { const node = selected(); if (node) context.notify(restoreNode(node.path) ?? "Restored"); });
-      main.append(toolbar);
+      action("Duplicate", "ph-copy", () => { const node = selected(); if (node) { const result = duplicateNode(node.path); if (result && !result.startsWith("/")) context.notify(result); } });
+      action("Copy Path", "ph-link-simple", async () => { if (selectedPath) { await navigator.clipboard?.writeText(selectedPath); context.notify("Path copied"); } });
+      action("Move to Trash", "ph-trash", () => { const node = selected(); if (node) context.notify(removeNode(node.path) ?? "Moved to Trash"); });
+      if (path === "/Trash") action("Restore", "ph-arrow-counter-clockwise", () => {
+        const node = selected();
+        if (!node) return;
+        const restoredPath = restoreNode(node.path);
+        if (restoredPath.startsWith("/")) {
+          context.notify(`${node.name} restored to ${restoredPath}`, { label: "Go to File", action: () => context.launchApp("files", { path: restoredPath }) });
+        } else {
+          context.notify(`Restore failed: ${restoredPath}`);
+        }
+      });
+      append(chrome, [header, toolbar]);
+      append(main, [chrome, body]);
 
       if (!node) {
-        main.append(el("p", "text-white/60", { text: "Folder not found." }));
+        body.append(el("p", "text-white/60", { text: "Folder not found." }));
         return;
       }
 
@@ -105,7 +122,7 @@ export const filesManifest: AppManifest = {
         const meta = metadataFor(node.path);
         const doc = el("article", "rounded-3xl border border-white/15 bg-white/10 p-5");
         append(doc, [icon(node.icon, "text-4xl text-cyan-200"), el("h2", "mt-3 text-2xl font-black", { text: node.name }), el("p", "mt-3 whitespace-pre-wrap text-white/70", { text: node.body || node.path }), el("p", "mt-4 font-mono text-xs text-white/40", { text: `${meta.favorite ? "starred - " : ""}${meta.tags?.length ? `tags: ${meta.tags.join(", ")} - ` : ""}${meta.comment ?? ""}` })]);
-        main.append(doc);
+        body.append(doc);
         return;
       }
 
@@ -137,7 +154,7 @@ export const filesManifest: AppManifest = {
         if (selectedPath === child.path) item.classList.add("border-cyan-300/40", "bg-cyan-300/10");
         grid.append(item);
       });
-      main.append(grid);
+      body.append(grid);
     }
 
     append(root, [sidebar, main]);

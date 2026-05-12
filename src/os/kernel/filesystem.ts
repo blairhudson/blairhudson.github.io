@@ -61,7 +61,7 @@ function migrateFs(root: FsNode) {
   if (oldHomepage) {
     oldHomepage.type = "link";
     oldHomepage.icon = "ph-file-html";
-    oldHomepage.href = "/old-homepage.html";
+    oldHomepage.href = "blairos://Desktop/old-homepage.html";
     oldHomepage.body = "Recovered BlairOS v1 homepage.";
     oldHomepage.originalPath = "/Desktop/old-homepage.html";
     changed = true;

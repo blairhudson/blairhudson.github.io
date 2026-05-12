@@ -6,6 +6,7 @@ import type { AppManifest } from "../../os/kernel/types";
 function normalizeBrowserUrl(value: string) {
   const trimmed = value.trim();
   if (!trimmed) return "blairos://home";
+  if (["old-homepage", "old-homepage.html", "/old-homepage.html", "blairos://old-homepage", "blairos://path/to/old-homepage.html", "blairos://desktop/old-homepage.html"].includes(trimmed.toLowerCase())) return "blairos://Desktop/old-homepage.html";
   if (trimmed.startsWith("//")) return `https:${trimmed}`;
   if (/^[a-z]+:\/\//i.test(trimmed)) return trimmed;
   if (trimmed.includes(".") && !trimmed.includes(" ")) return `https://${trimmed}`;
@@ -18,6 +19,7 @@ function browserTitleForUrl(url: string) {
     "blairos://coffee": "Browser - Caffeination Console",
     "blairos://matrix": "Browser - Matrix",
     "blairos://about-root": "Browser - Root Access",
+    "blairos://Desktop/old-homepage.html": "Browser - Old Homepage",
     "blairos://weekend-sprint": "Browser - Weekend Project Tokens",
     "blairos://rapid-systemisation": "Browser - Rapid Systemisation",
     "blairos://sublight": "Browser - Engage Sublight",
@@ -66,17 +68,22 @@ export const browserManifest: AppManifest = {
     let historyIndex = 0;
     let currentFrame: HTMLIFrameElement | null = null;
     const root = el("section", "flex h-full flex-col bg-slate-950/30 text-white");
-    const bar = el("div", "grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-white/10 p-3 max-sm:grid-cols-1");
-    const nav = el("div", "flex items-center gap-1");
-    const input = el("input", "min-w-0 flex-1 rounded-2xl border border-white/10 bg-black/30 px-4 py-2 font-mono text-sm text-white outline-none focus:border-cyan-300/60") as HTMLInputElement;
+    const bar = el("div", "grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-white/10 p-3 max-sm:gap-1.5 max-sm:p-2");
+    const nav = el("div", "flex min-w-0 items-center gap-1");
+    const input = el("input", "min-w-0 flex-1 rounded-2xl border border-white/10 bg-black/30 px-4 py-2 font-mono text-sm text-white outline-none focus:border-cyan-300/60 max-sm:px-2 max-sm:text-xs") as HTMLInputElement;
     input.value = currentUrl;
-    const actions = el("div", "flex items-center gap-2");
-    const controlClass = "grid h-10 w-10 place-items-center rounded-2xl border border-white/10 bg-white/8 text-white/75 transition hover:border-white/25 hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-35";
+    input.addEventListener("pointerdown", (event) => {
+      event.stopPropagation();
+      requestAnimationFrame(() => input.focus({ preventScroll: true }));
+    });
+    input.addEventListener("click", () => input.focus({ preventScroll: true }));
+    const actions = el("div", "flex min-w-0 items-center gap-2 max-sm:gap-1");
+    const controlClass = "grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/8 text-white/75 transition hover:border-white/25 hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-35 max-sm:h-8 max-sm:w-8 max-sm:rounded-xl";
     const back = el("button", controlClass, { type: "button", title: "Back" }) as HTMLButtonElement;
     const forward = el("button", controlClass, { type: "button", title: "Forward" }) as HTMLButtonElement;
     const reload = el("button", controlClass, { type: "button", title: "Reload" }) as HTMLButtonElement;
     const home = el("button", controlClass, { type: "button", title: "Home" }) as HTMLButtonElement;
-    const go = el("button", `${subtleButton} shrink-0`, { text: "Go", type: "button" });
+    const go = el("button", `${subtleButton} shrink-0 max-sm:px-2 max-sm:py-2 max-sm:text-xs`, { text: "Go", type: "button" });
     append(back, [icon("ph-arrow-left", "text-lg")]);
     append(forward, [icon("ph-arrow-right", "text-lg")]);
     append(reload, [icon("ph-arrow-clockwise", "text-lg")]);
@@ -171,14 +178,23 @@ export const browserManifest: AppManifest = {
 
     function navigate(rawUrl: string, push = true) {
       const url = normalizeBrowserUrl(rawUrl);
+      const previousUrl = currentUrl;
+      const link = links.find((item) => item.href === url || item.key === url.replace("blairos://", ""));
+      const href = link?.href || url;
+      if ((href.startsWith("http") || href.startsWith("/")) && frameBlockedLikely(href)) {
+        window.open(href, "_blank", "noopener,noreferrer");
+        input.value = currentUrl;
+        context.notify(`Opened ${href.replace(/^https?:\/\//, "")} in a new tab`);
+        return;
+      }
       if (push && url !== currentUrl) {
         history = [...history.slice(0, historyIndex + 1), url];
         historyIndex = history.length - 1;
       }
-      renderPage(url);
+      renderPage(url, previousUrl);
     }
 
-    function renderPage(url: string) {
+    function renderPage(url: string, fallbackUrl = "blairos://home") {
       currentUrl = url;
       currentFrame = null;
       input.value = url;
@@ -190,7 +206,7 @@ export const browserManifest: AppManifest = {
         const grid = el("div", "mx-auto grid w-full max-w-5xl min-w-0 gap-4 overflow-hidden p-5 max-sm:p-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]");
         const hero = el("div", "min-w-0 rounded-[30px] border border-white/15 bg-gradient-to-br from-cyan-400/15 to-fuchsia-400/10 p-6 max-sm:p-4");
         append(hero, [
-          el("div", "font-mono text-xs uppercase tracking-[0.35em] text-cyan-200", { text: "world wide web" }),
+          el("div", "font-mono text-xs uppercase tracking-[0.35em] text-cyan-200", { text: "internet of blair" }),
           el("h2", "mt-3 break-words text-4xl font-black tracking-[-0.08em] max-sm:text-3xl", { text: "Where do you want to go?" }),
           el("p", "mt-3 text-white/70", { text: "Type an address above, pick a bookmark, or head home." })
         ]);
@@ -212,6 +228,18 @@ export const browserManifest: AppManifest = {
         return;
       }
 
+      if (url === "blairos://Desktop/old-homepage.html") {
+        const frame = el("iframe", "h-full w-full border-0 bg-white", {
+          src: "/old-homepage.html",
+          title: "Old Homepage",
+          referrerpolicy: "no-referrer-when-downgrade"
+        }) as HTMLIFrameElement;
+        frame.addEventListener("load", () => context.updateTitle("Browser - Old Homepage"));
+        currentFrame = frame;
+        content.append(frame);
+        return;
+      }
+
       const link = links.find((item) => item.href === url || item.key === url.replace("blairos://", ""));
       if (link || url.startsWith("http") || url.startsWith("/")) {
         const href = link?.href || url;
@@ -220,14 +248,14 @@ export const browserManifest: AppManifest = {
           if (openedNewTab) return;
           openedNewTab = true;
           window.open(href, "_blank", "noopener,noreferrer");
-          content.className = "min-h-0 flex-1 overflow-auto";
-          content.replaceChildren(append(el("div", "grid min-h-full place-items-center p-6 text-center"), [
-            append(el("div", "max-w-sm rounded-[30px] border border-white/10 bg-black/30 p-6"), [
-              icon("ph-arrow-square-out", "mx-auto text-4xl text-cyan-200"),
-              el("h2", "mt-3 text-2xl font-black tracking-[-0.05em]", { text: "Opened in a new tab" }),
-              el("p", "mt-2 text-sm text-white/55", { text: href.replace(/^https?:\/\//, "") })
-            ])
-          ]));
+          context.notify(`Opened ${href.replace(/^https?:\/\//, "")} in a new tab`);
+          if (fallbackUrl !== url) {
+            if (history[historyIndex] === url) {
+              history = history.filter((_, index) => index !== historyIndex);
+              historyIndex = Math.max(0, historyIndex - 1);
+            }
+            renderPage(fallbackUrl, fallbackUrl);
+          }
         };
 
         if (frameBlockedLikely(href)) {
