@@ -1,4 +1,4 @@
-import { append, el, icon, subtleButton } from "../../os/kernel/dom";
+import { append, bindButtonAction, el, icon, subtleButton } from "../../os/kernel/dom";
 import { createNode, findNode, FS_CHANGED_EVENT, writeDocument } from "../../os/kernel/filesystem";
 import type { AppManifest } from "../../os/kernel/types";
 
@@ -255,13 +255,13 @@ export const sheetsManifest: AppManifest = {
 
     const saveButton = el("button", `${subtleButton} flex items-center gap-2`, { type: "button" });
     append(saveButton, [icon("ph-floppy-disk", "text-lg"), "Save"]);
-    saveButton.addEventListener("click", save);
+    bindButtonAction(saveButton, save);
     const addRow = el("button", subtleButton, { type: "button", text: "+ Row" });
-    addRow.addEventListener("click", () => { sheet.rows += 1; renderGrid(); updateDirty(); });
+    bindButtonAction(addRow, () => { sheet.rows += 1; renderGrid(); updateDirty(); });
     const addCol = el("button", subtleButton, { type: "button", text: "+ Column" });
-    addCol.addEventListener("click", () => { sheet.cols += 1; renderGrid(); updateDirty(); });
+    bindButtonAction(addCol, () => { sheet.cols += 1; renderGrid(); updateDirty(); });
     const exportCsv = el("button", subtleButton, { type: "button", text: "CSV" });
-    exportCsv.addEventListener("click", () => {
+    bindButtonAction(exportCsv, () => {
       const csvPath = path.replace(/\.[^.]+$/, ".csv");
       const error = findNode(csvPath) ? writeDocument(csvPath, serializeCsv(sheet)) : createNode(csvPath, "document", serializeCsv(sheet));
       context.notify(error ?? `Exported ${csvPath}`);

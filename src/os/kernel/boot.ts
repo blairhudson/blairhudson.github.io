@@ -2,7 +2,7 @@ import Fuse from "fuse.js";
 import { toCanvas } from "html-to-image";
 import interact from "interactjs";
 import { appManifests, appRegistry } from "./apps";
-import { append, el, glass, icon } from "./dom";
+import { append, bindButtonAction, el, glass, icon } from "./dom";
 import { copyNode, createNode, desktopNodes, findNode, moveNode, removeNode, searchableNodes, writeDocument } from "./filesystem";
 import { jobs, startJob, finishJob, failJob, updateJob } from "./jobs";
 import { logEvent } from "./logs";
@@ -53,6 +53,8 @@ let contextMenu: HTMLElement | null = null;
 let notificationPanel: HTMLElement | null = null;
 let osKeyboard: HTMLElement;
 let osKeyboardShifted = false;
+let osKeyboardPinned = false;
+let keyboardMode: "os" | "native" = localStorage.getItem("blairos.keyboardMode") === "native" ? "native" : "os";
 let toastTimer: number | undefined;
 let clipboardPath = "";
 let screensaver: HTMLElement | null = null;
@@ -190,7 +192,7 @@ function showLockScreen() {
   const card = append(el("div", "grid justify-items-center gap-5 text-center"), [clock, el("p", "text-white/60", { text: "blair locked this session" }), el("button", "rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-black text-slate-950 hover:bg-cyan-200", { type: "button", text: "Wake" })]);
   const timer = window.setInterval(tick, 15000);
   tick();
-  (card.lastElementChild as HTMLButtonElement).addEventListener("click", () => { window.clearInterval(timer); overlay.remove(); notify("Session unlocked"); });
+  bindButtonAction(card.lastElementChild as HTMLButtonElement, () => { window.clearInterval(timer); overlay.remove(); notify("Session unlocked"); });
   append(overlay, [card]);
   root.append(overlay);
   notify("Display locked");
@@ -251,8 +253,14 @@ function bindIdleScreensaver() {
   resetIdleTimer();
 }
 
-function showNotificationCenter(anchor?: HTMLElement) {
+function closeNotificationCenter() {
   notificationPanel?.remove();
+  notificationPanel = null;
+}
+
+function showNotificationCenter(anchor?: HTMLElement) {
+  closeNotificationCenter();
+  closeContextMenu();
   const items = notifications.get();
   const activeJobs = jobs.get();
   notificationPanel = el("aside", "fixed right-3 top-[calc(var(--menu-height)+8px)] z-[9400] grid max-h-[min(680px,calc(100vh-90px))] w-[min(390px,calc(100vw-24px))] grid-rows-[auto_1fr_auto] gap-3 overflow-hidden rounded-[30px] border border-white/15 bg-slate-950/90 p-4 text-white shadow-2xl shadow-black/45 backdrop-blur-2xl");
@@ -274,8 +282,8 @@ function showNotificationCenter(anchor?: HTMLElement) {
   if (!activeJobs.length && !items.length) list.append(el("p", "rounded-2xl border border-white/10 bg-white/8 p-4 text-white/50", { text: "No notifications" }));
   const footer = el("div", "flex gap-2");
   append(footer, [el("button", "rounded-2xl bg-white/10 px-3 py-2 text-xs font-bold hover:bg-white/20", { type: "button", text: "Clear" }), el("button", "rounded-2xl bg-cyan-300 px-3 py-2 text-xs font-bold text-slate-950 hover:bg-cyan-200", { type: "button", text: "Open Console" })]);
-  (footer.firstElementChild as HTMLButtonElement).addEventListener("click", () => { clearNotifications(); notificationPanel?.remove(); notificationPanel = null; });
-  (footer.lastElementChild as HTMLButtonElement).addEventListener("click", () => { launchApp("console"); notificationPanel?.remove(); notificationPanel = null; });
+  bindButtonAction(footer.firstElementChild as HTMLButtonElement, () => { clearNotifications(); closeNotificationCenter(); });
+  bindButtonAction(footer.lastElementChild as HTMLButtonElement, () => { launchApp("console"); closeNotificationCenter(); });
   append(notificationPanel, [list, footer]);
   root.append(notificationPanel);
   if (anchor) {
@@ -293,7 +301,7 @@ function showEasterOverlay(title: string, detail: string) {
     el("p", "mt-4 text-white/65", { text: detail }),
     el("button", "mt-6 rounded-2xl bg-cyan-300 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-cyan-200", { type: "button", text: "Continue" })
   ]);
-  (card.lastElementChild as HTMLButtonElement).addEventListener("click", () => overlay.remove());
+  bindButtonAction(card.lastElementChild as HTMLButtonElement, () => overlay.remove());
   overlay.addEventListener("click", (event) => {
     if (event.target === overlay) overlay.remove();
   });
@@ -410,7 +418,7 @@ function showContextMenu(x: number, y: number, items: MenuItem[]) {
   items.forEach((item) => {
     const row = el("button", "grid grid-cols-[1fr_auto] items-center gap-4 rounded-xl px-3 py-2 text-left text-white/78 transition hover:bg-white/10 hover:text-white", { type: "button" });
     append(row, [el("span", "truncate", { text: item.label }), el("span", "font-mono text-xs text-white/35", { text: item.shortcut || "" })]);
-    row.addEventListener("click", () => {
+    bindButtonAction(row, () => {
       item.action();
       closeContextMenu();
     });
@@ -473,6 +481,7 @@ function makeMenuBar() {
   const left = el("div", "flex min-w-0 items-center gap-1 overflow-hidden");
   let openDropdown: HTMLElement | null = null;
   let openDropdownAnchor: HTMLElement | null = null;
+  let openDropdownKey: string | null = null;
   const menuButtonClass = "rounded-md px-2 py-1 font-medium text-white/75 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-300/40";
   const mark = el("button", `${menuButtonClass} mr-1 font-black tracking-[-.04em] text-white max-sm:py-2`, { type: "button", text: "BlairOS" });
   activeApp = el("button", `${menuButtonClass} max-w-36 truncate font-bold text-white/85 max-sm:max-w-[7.5rem] max-sm:px-1.5 max-sm:py-2`, { type: "button", text: "Finder" });
@@ -492,23 +501,27 @@ function makeMenuBar() {
     openDropdown?.remove();
     openDropdown = null;
     openDropdownAnchor = null;
+    openDropdownKey = null;
   }
 
-  function showMenu(button: HTMLElement, items: MenuItem[]) {
+  function showMenu(button: HTMLElement, items: MenuItem[], key = button.dataset.menuKey ?? button.textContent ?? button.title) {
     if (openDropdown) {
-      const sameButton = openDropdownAnchor === button;
+      const sameButton = openDropdownAnchor === button || openDropdownKey === key;
       closeMenu();
       if (sameButton) return;
     }
+    closeNotificationCenter();
+    closeContextMenu();
     const rect = button.getBoundingClientRect();
     openDropdown = el("div", "fixed z-[9200] grid min-w-56 gap-1 rounded-2xl border border-white/15 bg-slate-950/90 p-2 text-sm text-white shadow-2xl shadow-black/40 backdrop-blur-2xl max-sm:max-h-[calc(100dvh-var(--menu-height)-16px)] max-sm:w-[calc(100vw-16px)] max-sm:overflow-auto");
     openDropdownAnchor = button;
+    openDropdownKey = key;
     openDropdown.style.left = isSmallScreen() ? "8px" : `${Math.max(8, Math.min(rect.left, window.innerWidth - 240))}px`;
     openDropdown.style.top = `${rect.bottom + 6}px`;
     items.forEach((item) => {
       const row = el("button", "grid grid-cols-[1fr_auto] items-center gap-4 rounded-xl px-3 py-2 text-left text-white/78 transition hover:bg-white/10 hover:text-white", { type: "button" });
       append(row, [el("span", "truncate", { text: item.label }), el("span", "font-mono text-xs text-white/35", { text: item.shortcut || "" })]);
-      row.addEventListener("click", () => {
+      bindButtonAction(row, () => {
         item.action();
         closeMenu();
       });
@@ -519,7 +532,8 @@ function makeMenuBar() {
 
   function menuButton(label: string, items: MenuItem[]) {
     const button = el("button", `${menuButtonClass} max-sm:hidden`, { type: "button", text: label });
-    button.addEventListener("click", (event) => {
+    button.dataset.menuKey = label;
+    bindButtonAction(button, (event) => {
       event.stopPropagation();
       showMenu(button, items);
     });
@@ -551,7 +565,65 @@ function makeMenuBar() {
     ];
   }
 
-  mark.addEventListener("click", (event) => {
+  function completeReset() {
+    const overlay = el("div", "fixed inset-0 z-[9900] grid place-items-center bg-black/55 p-4 text-white backdrop-blur-md");
+    const cancel = el("button", "rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold text-white/80 hover:bg-white/20", { type: "button", text: "Cancel" });
+    const reset = el("button", "rounded-2xl bg-red-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-red-300", { type: "button", text: "Erase All Content and Settings" });
+    const card = append(el("section", "w-[min(420px,calc(100vw-24px))] rounded-[30px] border border-red-300/25 bg-slate-950/95 p-5 shadow-2xl shadow-black/45"), [
+      el("p", "font-mono text-xs uppercase tracking-[0.32em] text-red-200", { text: "system reset" }),
+      el("h2", "mt-3 text-3xl font-black tracking-[-0.07em]", { text: "Erase All Content and Settings?" }),
+      el("p", "mt-3 text-sm leading-6 text-white/65", { text: "This clears saved windows, files, settings, mail drafts, recents, and app state on this device." }),
+      append(el("div", "mt-5 flex justify-end gap-2"), [cancel, reset])
+    ]);
+    const close = () => overlay.remove();
+    bindButtonAction(cancel, close);
+    bindButtonAction(reset, () => {
+      localStorage.clear();
+      window.location.reload();
+    });
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) close();
+    });
+    append(overlay, [card]);
+    root.append(overlay);
+  }
+
+  function showKeyboardShortcutsPanel() {
+    const shortcuts = [
+      ["Open Launcher", "Cmd+K"],
+      ["Open Terminal", "Cmd+Space"],
+      ["Open Settings", "Cmd+,"],
+      ["Close Window", "Cmd+W"],
+      ["Minimize Window", "Cmd+M"],
+      ["Lock Screen", "Cmd+L"],
+      ["Screenshot", "Cmd+P"],
+      ["Cycle Windows", "Cmd+`"]
+    ];
+    const overlay = el("div", "fixed inset-0 z-[9900] grid place-items-center bg-black/45 p-4 text-white backdrop-blur-md");
+    const close = el("button", "rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold text-white/80 hover:bg-white/20", { type: "button", text: "Close" });
+    const rows = el("div", "mt-5 grid gap-2");
+    shortcuts.forEach(([label, keys]) => {
+      append(rows, [append(el("div", "grid grid-cols-[1fr_auto] items-center gap-4 rounded-2xl border border-white/10 bg-white/8 px-3 py-2"), [
+        el("span", "text-sm text-white/75", { text: label }),
+        el("kbd", "rounded-xl border border-cyan-200/25 bg-cyan-200/10 px-2 py-1 font-mono text-xs font-bold text-cyan-100", { text: keys })
+      ])]);
+    });
+    const card = append(el("section", "w-[min(460px,calc(100vw-24px))] rounded-[30px] border border-cyan-200/20 bg-slate-950/95 p-5 shadow-2xl shadow-black/45"), [
+      el("p", "font-mono text-xs uppercase tracking-[0.32em] text-cyan-200", { text: "keyboard" }),
+      el("h2", "mt-3 text-3xl font-black tracking-[-0.07em]", { text: "Shortcuts" }),
+      rows,
+      append(el("div", "mt-5 flex justify-end"), [close])
+    ]);
+    const dismiss = () => overlay.remove();
+    bindButtonAction(close, dismiss);
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) dismiss();
+    });
+    append(overlay, [card]);
+    root.append(overlay);
+  }
+
+  bindButtonAction(mark, (event) => {
     event.stopPropagation();
     const recentItems = getRecentItems().slice(0, 5).map((item) => ({ label: item.title, action: () => runRecent(item) }));
     showMenu(mark, [
@@ -564,7 +636,7 @@ function makeMenuBar() {
     ]);
   });
 
-  activeApp.addEventListener("click", (event) => {
+  bindButtonAction(activeApp, (event) => {
     event.stopPropagation();
     if (isSmallScreen()) {
       showMenu(activeApp, mobileMenuItems());
@@ -619,20 +691,31 @@ function makeMenuBar() {
 
   const right = el("div", "flex items-center justify-end gap-2 text-white/70 max-sm:gap-1");
   const search = append(el("button", "grid h-7 w-7 place-items-center rounded-full border border-white/10 bg-white/8 text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:h-9 max-sm:w-9", { type: "button", title: "Search" }), [icon("ph-magnifying-glass", "text-base")]);
-  search.addEventListener("click", openLauncher);
-  const user = append(el("button", "flex items-center gap-1 rounded-full border border-white/10 bg-white/8 px-2 py-1 text-xs font-semibold text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:hidden", { type: "button", title: "blair" }), [icon("ph-user-circle", "text-base"), "blair"]);
-  user.addEventListener("click", (event) => {
+  bindButtonAction(search, openLauncher);
+  const accessibility = append(el("button", "grid h-7 w-7 place-items-center rounded-full border border-white/10 bg-white/8 text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:h-9 max-sm:w-9", { type: "button", title: "Accessibility Keyboard" }), [icon("ph-keyboard", "text-base")]);
+  bindButtonAction(accessibility, (event) => {
+    event.stopPropagation();
+    showMenu(accessibility, [
+      { label: keyboardMode === "os" ? "Use Browser Native Keyboard" : "Use BlairOS Keyboard", action: toggleKeyboardMode },
+      { label: osKeyboardPinned ? "Hide Accessibility Keyboard" : "Show Accessibility Keyboard", action: toggleOsKeyboardPinned },
+      { label: "Keyboard Shortcuts", action: showKeyboardShortcutsPanel },
+      { label: "Open Settings", action: () => launchApp("settings") }
+    ]);
+  });
+  const user = append(el("button", "flex items-center gap-1 rounded-full border border-white/10 bg-white/8 px-2 py-1 text-xs font-semibold text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:grid max-sm:h-9 max-sm:w-9 max-sm:place-items-center max-sm:px-0", { type: "button", title: "blair" }), [icon("ph-user-circle", "text-base"), el("span", "max-sm:hidden", { text: "blair" })]);
+  bindButtonAction(user, (event) => {
     event.stopPropagation();
     showMenu(user, [
       { label: "Open Profile", action: () => launchApp("about") },
       { label: "Home Folder", action: () => launchApp("files", { path: "/Home/blair" }) },
       { label: "System Settings", shortcut: "Cmd+,", action: () => launchApp("settings") },
       { label: "Start Screensaver", action: () => startScreensaver() },
-      { label: "Lock Screen", action: showLockScreen }
+      { label: "Lock Screen", action: showLockScreen },
+      { label: "Erase All Content and Settings", action: completeReset }
     ]);
   });
   const wifi = append(el("button", "grid h-7 w-7 place-items-center rounded-full border border-white/10 bg-white/8 text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:h-9 max-sm:w-9", { type: "button", title: "Wi-Fi connected" }), [icon("ph-wifi-high", "text-base")]);
-  wifi.addEventListener("click", (event) => {
+  bindButtonAction(wifi, (event) => {
     event.stopPropagation();
     showMenu(wifi, [
       { label: "Open Network Utility", action: () => launchApp("networkUtility") },
@@ -641,7 +724,7 @@ function makeMenuBar() {
     ]);
   });
   const battery = append(el("button", "flex h-7 items-center gap-1 rounded-full border border-white/10 bg-white/8 px-2 py-1 font-mono text-xs text-white/75 transition hover:border-white/20 hover:bg-white/15 max-sm:h-9 max-sm:w-9 max-sm:justify-center max-sm:px-0", { type: "button", title: "Battery 92%" }), [icon("ph-battery-full", "text-base text-emerald-200"), el("span", "max-sm:hidden", { text: "92%" })]);
-  battery.addEventListener("click", (event) => {
+  bindButtonAction(battery, (event) => {
     event.stopPropagation();
     showMenu(battery, [
       { label: "Battery: 92%", action: () => notify("Battery 92%, healthy") },
@@ -651,8 +734,14 @@ function makeMenuBar() {
     ]);
   });
   const clock = el("button", "rounded-md px-2 py-1 font-mono transition hover:bg-white/10 max-sm:py-2 max-sm:text-xs", { type: "button" });
-  clock.addEventListener("click", (event) => {
+  bindButtonAction(clock, (event) => {
     event.stopPropagation();
+    if (notificationPanel) {
+      closeNotificationCenter();
+      return;
+    }
+    closeMenu();
+    closeContextMenu();
     showNotificationCenter(clock);
   });
   const tick = () => (clock.textContent = new Intl.DateTimeFormat("en-AU", { hour: "2-digit", minute: "2-digit", ...(isSmallScreen() ? {} : { weekday: "short" }), hour12: !settings.get().clock24h }).format(new Date()));
@@ -660,7 +749,7 @@ function makeMenuBar() {
   tick();
   window.setInterval(tick, 15000);
   window.addEventListener("resize", tick, { passive: true });
-  append(right, [search, user, wifi, battery, clock]);
+  append(right, [search, accessibility, user, wifi, battery, clock]);
   append(menu, [left, right]);
   root.append(menu);
 }
@@ -674,7 +763,7 @@ function makeDesktop() {
     append(item, [icon(node.icon, "text-4xl text-cyan-100 drop-shadow"), el("span", "max-w-full break-words [text-shadow:0_1px_8px_rgba(0,0,0,.8)]", { text: node.name })]);
     bindFsDrag(item, node);
     item.addEventListener("dblclick", () => openNode(node));
-    item.addEventListener("click", () => isSmallScreen() ? openNode(node) : notify(`${node.name} selected. Double-click to open.`));
+    bindButtonAction(item, () => isSmallScreen() ? openNode(node) : notify(`${node.name} selected. Double-click to open.`));
     grid.append(item);
   });
   desktop.append(grid);
@@ -695,8 +784,9 @@ function renderDock() {
     item.dataset.appId = app.id;
     item.append(icon(app.icon, "block text-3xl leading-none"));
     item.append(el("span", "pointer-events-none absolute bottom-[calc(100%+10px)] left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl border border-white/15 bg-slate-950/90 px-2.5 py-1 text-xs font-bold text-white shadow-xl group-hover:block", { text: app.name }));
-    item.addEventListener("click", () => {
-      const existing = processes.get().find((process) => process.appId === app.id);
+    bindButtonAction(item, () => {
+      const appProcesses = processes.get().filter((process) => process.appId === app.id).sort((a, b) => b.z - a.z);
+      const existing = appProcesses.find((process) => process.minimized) ?? appProcesses[0];
       existing ? restoreProcess(existing.id) : launchApp(app.id);
     });
     dock.append(item);
@@ -715,7 +805,34 @@ function osKeyData(key: string) {
   if (key === "Ctrl+X") return "\x18";
   if (key === "Ctrl+O") return "\x0f";
   if (key === "Ctrl+K") return "\x0b";
-  return osKeyboardShifted && /^[a-z]$/.test(key) ? key.toUpperCase() : key;
+  return osKeyboardShifted ? shiftedOsKey(key) : key;
+}
+
+function shiftedOsKey(key: string) {
+  const shifted: Record<string, string> = {
+    "1": "!",
+    "2": "@",
+    "3": "#",
+    "4": "$",
+    "5": "%",
+    "6": "^",
+    "7": "&",
+    "8": "*",
+    "9": "(",
+    "0": ")",
+    "/": "?",
+    ".": ">",
+    "-": "_",
+    "_": "-",
+    "|": "\\",
+    "~": "`"
+  };
+  if (/^[a-z]$/.test(key)) return key.toUpperCase();
+  return shifted[key] ?? key;
+}
+
+function clearShiftAfterKey(key: string) {
+  return /^[a-z0-9]$/.test(key) || ["/", ".", "-", "_", "|", "~"].includes(key);
 }
 
 function osKeyIcon(key: string) {
@@ -737,6 +854,11 @@ function osKeyIcon(key: string) {
 }
 
 function sendOsKey(key: string) {
+  if (launcher && !launcher.classList.contains("hidden") && isEditableElement(launcherInput)) {
+    launcherInput.focus({ preventScroll: true });
+    applyOsKeyToEditable(launcherInput, key, osKeyData(key));
+    return;
+  }
   const process = focusedProcess();
   if (!process) return;
   const data = osKeyData(key);
@@ -775,6 +897,14 @@ function editableTarget(process: ProcessRecord) {
 function hasFocusedEditable(process: ProcessRecord) {
   const win = processWindow(process);
   return Boolean(win && isEditableElement(document.activeElement) && win.contains(document.activeElement));
+}
+
+function animateWindowAction(win: HTMLElement, frames: Keyframe[], done: () => void) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    done();
+    return;
+  }
+  void win.animate(frames, { duration: 150, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" }).finished.finally(done);
 }
 
 function setNativeKeyboardMode(win: HTMLElement, enabled: boolean) {
@@ -853,7 +983,7 @@ function renderOsKeyboard() {
       const keyIcon = osKeyIcon(key);
       const button = el("button", "grid min-h-10 min-w-0 place-items-center truncate rounded-xl border border-white/10 bg-white/10 px-1 text-center text-[0.68rem] font-bold text-white/80 active:bg-cyan-200/25", { type: "button", title: key, "aria-label": key });
       if (keyIcon) button.append(icon(keyIcon, `${key === "Shift" && osKeyboardShifted ? "text-cyan-200" : "text-white/80"} text-lg`));
-      else button.textContent = osKeyboardShifted && /^[a-z]$/.test(key) ? key.toUpperCase() : key;
+      else button.textContent = osKeyboardShifted ? shiftedOsKey(key) : key;
       button.addEventListener("pointerdown", (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -863,7 +993,7 @@ function renderOsKeyboard() {
           return;
         }
         sendOsKey(key);
-        if (osKeyboardShifted && /^[a-z]$/.test(key)) {
+        if (osKeyboardShifted && clearShiftAfterKey(key)) {
           osKeyboardShifted = false;
           renderOsKeyboard();
         }
@@ -877,18 +1007,42 @@ function renderOsKeyboard() {
 function syncOsKeyboard() {
   if (!osKeyboard) return;
   const process = focusedProcess();
-  const visible = Boolean(isSmallScreen() && process && !process.minimized && (process.appId === "terminal" || hasFocusedEditable(process)));
+  const launcherFocused = Boolean(launcher && !launcher.classList.contains("hidden") && document.activeElement === launcherInput);
+  const appNeedsKeyboard = Boolean(process && !process.minimized && (process.appId === "terminal" || hasFocusedEditable(process)));
+  const useOsKeyboard = keyboardMode === "os";
+  const visible = useOsKeyboard && (osKeyboardPinned || Boolean(isSmallScreen() && (launcherFocused || appNeedsKeyboard)));
   osKeyboard.hidden = !visible;
-  windowLayer?.querySelectorAll<HTMLElement>("[data-process]").forEach((node) => setNativeKeyboardMode(node, isSmallScreen()));
+  windowLayer?.querySelectorAll<HTMLElement>("[data-process]").forEach((node) => setNativeKeyboardMode(node, visible && isSmallScreen()));
+  if (launcherInput) {
+    if (visible && isSmallScreen()) launcherInput.inputMode = "none";
+    else launcherInput.removeAttribute("inputmode");
+  }
   if (dock) dock.style.display = visible ? "none" : "";
   if (!windowLayer) return;
   const setBottomHeight = () => {
     const value = visible ? `${Math.max(172, osKeyboard.getBoundingClientRect().height)}px` : "var(--dock-height)";
     root.style.setProperty("--mobile-bottom-height", value);
-    windowLayer.style.bottom = value;
   };
   setBottomHeight();
   if (visible) requestAnimationFrame(setBottomHeight);
+}
+
+function toggleOsKeyboardPinned() {
+  if (!osKeyboardPinned && keyboardMode !== "os") {
+    keyboardMode = "os";
+    localStorage.setItem("blairos.keyboardMode", keyboardMode);
+  }
+  osKeyboardPinned = !osKeyboardPinned;
+  syncOsKeyboard();
+  notify(osKeyboardPinned ? "Accessibility Keyboard shown" : "Accessibility Keyboard hidden");
+}
+
+function toggleKeyboardMode() {
+  keyboardMode = keyboardMode === "os" ? "native" : "os";
+  if (keyboardMode === "native") osKeyboardPinned = false;
+  localStorage.setItem("blairos.keyboardMode", keyboardMode);
+  syncOsKeyboard();
+  notify(keyboardMode === "os" ? "BlairOS Keyboard enabled" : "Browser native keyboard enabled");
 }
 
 function makeOsKeyboard() {
@@ -897,6 +1051,8 @@ function makeOsKeyboard() {
   renderOsKeyboard();
   root.append(osKeyboard);
   window.addEventListener("resize", syncOsKeyboard, { passive: true });
+  document.addEventListener("focusin", () => requestAnimationFrame(syncOsKeyboard));
+  document.addEventListener("focusout", () => requestAnimationFrame(syncOsKeyboard));
   windowLayer.addEventListener("focusin", syncOsKeyboard);
   windowLayer.addEventListener("focusout", () => requestAnimationFrame(syncOsKeyboard));
   windowLayer.addEventListener("pointerdown", (event) => {
@@ -930,8 +1086,8 @@ function naturalActions(query: string): SearchItem[] {
 }
 
 function makeLauncher() {
-  launcher = el("div", "fixed inset-0 z-[9000] hidden place-items-start justify-center bg-black/25 pt-[11vh] backdrop-blur-sm max-sm:pt-[calc(var(--menu-height)+8px)]");
-  const panel = el("div", `${glass} w-[min(720px,calc(100vw-26px))] overflow-hidden rounded-[28px] max-sm:h-[calc(100dvh-var(--menu-height)-24px)] max-sm:w-[calc(100vw-16px)] max-sm:rounded-[22px]`);
+  launcher = el("div", "fixed inset-x-0 bottom-[var(--mobile-bottom-height)] top-[var(--menu-height)] z-[6900] hidden place-items-start justify-center bg-black/25 pt-[8vh] backdrop-blur-sm max-sm:pt-2");
+  const panel = el("div", `${glass} w-[min(720px,calc(100vw-26px))] overflow-hidden rounded-[28px] max-sm:h-[calc(100dvh-var(--menu-height)-var(--mobile-bottom-height)-16px)] max-sm:w-[calc(100vw-16px)] max-sm:rounded-[22px]`);
   launcherInput = el("input", "w-full border-0 border-b border-white/15 bg-transparent px-5 py-5 text-lg text-white outline-none placeholder:text-white/35 max-sm:px-4 max-sm:py-4", { placeholder: "Search apps, files, links, /bin..." }) as HTMLInputElement;
   launcherResults = el("div", "grid max-h-[min(520px,58vh)] gap-1 overflow-auto p-2 max-sm:max-h-[calc(100dvh-var(--menu-height)-110px)]");
   append(panel, [launcherInput, launcherResults]);
@@ -940,6 +1096,8 @@ function makeLauncher() {
     if (event.target === launcher) closeLauncher();
   });
   launcherInput.addEventListener("input", renderLauncherResults);
+  launcherInput.addEventListener("focus", syncOsKeyboard);
+  launcherInput.addEventListener("blur", () => requestAnimationFrame(syncOsKeyboard));
   launcherInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") (launcherResults.querySelector("button") as HTMLButtonElement | null)?.click();
   });
@@ -951,12 +1109,17 @@ function openLauncher() {
   launcher.classList.add("grid");
   launcherInput.value = "";
   renderLauncherResults();
-  launcherInput.focus();
+  if (isSmallScreen() && keyboardMode === "os") launcherInput.inputMode = "none";
+  launcherInput.focus({ preventScroll: true });
+  syncOsKeyboard();
+  requestAnimationFrame(syncOsKeyboard);
 }
 
 function closeLauncher() {
   launcher.classList.add("hidden");
   launcher.classList.remove("grid");
+  launcherInput.blur();
+  requestAnimationFrame(syncOsKeyboard);
 }
 
 function renderLauncherResults() {
@@ -967,7 +1130,7 @@ function renderLauncherResults() {
   results.slice(0, 18).forEach((item) => {
     const row = el("button", "grid grid-cols-[46px_1fr_auto] items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left transition hover:border-white/15 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-300/40 max-sm:grid-cols-[40px_1fr] max-sm:py-3", { type: "button" });
     append(row, [icon(item.icon, "text-3xl text-cyan-100"), append(el("span", "min-w-0"), [el("span", "block truncate font-semibold", { text: item.title }), el("span", "block truncate text-xs text-white/45", { text: item.subtitle })]), el("span", "font-mono text-xs uppercase text-white/40 max-sm:hidden", { text: item.kind })]);
-    row.addEventListener("click", () => {
+    bindButtonAction(row, () => {
       item.action();
       closeLauncher();
     });
@@ -976,7 +1139,7 @@ function renderLauncherResults() {
 }
 
 function makeWindowLayer() {
-  windowLayer = el("section", "pointer-events-none fixed inset-x-0 bottom-[var(--mobile-bottom-height)] top-[var(--menu-height)] max-sm:grid max-sm:items-stretch max-sm:overflow-hidden max-sm:p-1.5");
+  windowLayer = el("section", "pointer-events-none fixed inset-x-0 bottom-0 top-[var(--menu-height)] max-sm:grid max-sm:items-stretch max-sm:overflow-hidden max-sm:p-1.5");
   root.append(windowLayer);
 }
 
@@ -1004,17 +1167,32 @@ function renderWindows() {
 
 function createWindow(process: ProcessRecord) {
   const app = appRegistry[process.appId];
-  const win = el("article", `${glass} pointer-events-auto absolute grid min-h-60 min-w-80 grid-rows-[42px_1fr] overflow-hidden rounded-[22px] max-sm:relative max-sm:!left-auto max-sm:!top-auto max-sm:!h-[calc(100dvh-var(--menu-height)-var(--mobile-bottom-height)-12px)] max-sm:!w-full max-sm:!min-w-0 max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:grid-rows-[48px_1fr] max-sm:rounded-[18px]`);
+  const win = el("article", `${glass} blairos-window pointer-events-auto absolute grid min-h-60 min-w-80 grid-rows-[42px_1fr] overflow-hidden rounded-[22px] max-sm:relative max-sm:!left-auto max-sm:!top-auto max-sm:!h-[calc(100dvh-var(--menu-height)-var(--mobile-bottom-height)-12px)] max-sm:!w-full max-sm:!min-w-0 max-sm:grid-rows-[48px_1fr] max-sm:rounded-[18px]`);
   win.dataset.process = process.id;
-  const titlebar = el("header", "window-drag grid cursor-grab select-none grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-white/15 bg-white/5 px-3");
-  const controls = el("div", "flex gap-2");
-  const controlClass = "h-3.5 w-3.5 rounded-full border border-black/20 transition hover:scale-125 hover:brightness-125 hover:ring-2 hover:ring-white/45 focus:outline-none focus:ring-2 focus:ring-cyan-200/70 max-sm:h-7 max-sm:w-7 max-sm:hover:scale-100";
+  const titlebar = el("header", "window-drag grid cursor-grab touch-none select-none grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-white/15 bg-white/5 px-3");
+  const controls = el("div", "relative z-10 flex gap-2 max-sm:gap-2.5");
+  const controlClass = "h-3.5 w-3.5 rounded-full border border-black/20 transition hover:scale-125 hover:brightness-125 hover:ring-2 hover:ring-white/45 focus:outline-none focus:ring-2 focus:ring-cyan-200/70 max-sm:h-5 max-sm:w-5 max-sm:hover:scale-100";
   const close = el("button", `${controlClass} bg-[#ff5f57] hover:shadow-[0_0_12px_rgba(255,95,87,.7)]`, { type: "button", title: "close" });
   const min = el("button", `${controlClass} bg-[#ffbd2e] hover:shadow-[0_0_12px_rgba(255,189,46,.7)]`, { type: "button", title: "minimize to Dock" });
   const max = el("button", `${controlClass} bg-[#28c840] hover:shadow-[0_0_12px_rgba(40,200,64,.7)]`, { type: "button", title: "maximize" });
-  close.addEventListener("click", () => closeProcess(process.id));
-  min.addEventListener("click", () => minimizeProcess(process.id));
-  max.addEventListener("click", () => toggleMaximizeProcess(process.id));
+  [close, min, max].forEach((control) => {
+    control.addEventListener("pointerdown", (event) => event.stopPropagation());
+  });
+  bindButtonAction(close, (event) => {
+    event.stopPropagation();
+    animateWindowAction(win, [{ opacity: 1 }, { opacity: 0, transform: "scale(.96) translateY(-8px)", filter: "blur(3px)" }], () => closeProcess(process.id));
+  });
+  bindButtonAction(min, (event) => {
+    event.stopPropagation();
+    animateWindowAction(win, [{ opacity: 1 }, { opacity: 0, transform: "translateY(22px) scale(.95)", filter: "blur(2px)" }], () => minimizeProcess(process.id));
+  });
+  bindButtonAction(max, (event) => {
+    event.stopPropagation();
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      win.animate([{ transform: "scale(1)" }, { transform: "scale(.985)" }, { transform: "scale(1)" }], { duration: 140, easing: "cubic-bezier(.2,.8,.2,1)" });
+    }
+    toggleMaximizeProcess(process.id);
+  });
   append(controls, [close, min, max]);
   const titleLabel = append(el("div", "truncate text-sm font-bold text-white/75", { "data-window-title": "true" }), [icon(process.icon, "mr-2 inline text-lg text-cyan-200"), process.title]);
   append(titlebar, [controls, titleLabel, el("span", "font-mono text-[0.68rem] text-white/35 max-sm:hidden", { text: process.id })]);
@@ -1036,6 +1214,14 @@ function createWindow(process: ProcessRecord) {
 }
 
 function syncWindow(win: HTMLElement, process: ProcessRecord, isFocused: boolean) {
+  if (!process.minimized) {
+    win.getAnimations().forEach((animation) => animation.cancel());
+    win.style.opacity = "";
+    win.style.filter = "";
+    win.style.transform = isSmallScreen() && win.dataset.mobileDragX && win.dataset.mobileDragY
+      ? `translate(${win.dataset.mobileDragX}px, ${win.dataset.mobileDragY}px)`
+      : "";
+  }
   win.classList.toggle("hidden", process.minimized || (isSmallScreen() && !isFocused));
   win.classList.toggle("ring-1", isFocused);
   win.classList.toggle("ring-cyan-200/35", isFocused);
@@ -1057,20 +1243,30 @@ function syncWindow(win: HTMLElement, process: ProcessRecord, isFocused: boolean
 }
 
 function attachInteract(win: HTMLElement, processId: string) {
-  interact(win)
+  const interaction = interact(win)
     .draggable({
       allowFrom: ".window-drag",
       ignoreFrom: "button,input",
-      modifiers: [interact.modifiers.restrictRect({ restriction: "parent" })],
       listeners: {
         move(event) {
           const process = processes.get().find((item) => item.id === processId);
-          if (!process || process.maximized || isSmallScreen()) return;
+          if (!process || process.maximized) return;
+          if (isSmallScreen()) {
+            const x = Number(win.dataset.mobileDragX ?? 0) + event.dx;
+            const y = Number(win.dataset.mobileDragY ?? 0) + event.dy;
+            win.dataset.mobileDragX = String(x);
+            win.dataset.mobileDragY = String(y);
+            win.style.transform = `translate(${x}px, ${y}px)`;
+            return;
+          }
           updateProcess(processId, { x: process.x + event.dx, y: process.y + event.dy });
         }
       }
-    })
-    .resizable({
+    });
+
+  if (isSmallScreen()) return;
+
+  interaction.resizable({
       edges: { left: true, right: true, bottom: true, top: true },
       modifiers: [interact.modifiers.restrictSize({ min: { width: 320, height: 240 } })],
       listeners: {

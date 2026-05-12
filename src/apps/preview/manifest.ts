@@ -1,4 +1,4 @@
-import { append, el, icon } from "../../os/kernel/dom";
+import { append, bindButtonAction, el, icon } from "../../os/kernel/dom";
 import { findNode } from "../../os/kernel/filesystem";
 import type { AppManifest } from "../../os/kernel/types";
 
@@ -70,7 +70,7 @@ export const previewManifest: AppManifest = {
     const node = findNode(path);
     const root = el("section", "grid h-full grid-rows-[auto_1fr] text-white");
     const codeMode = el("button", "rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-xs font-bold transition hover:bg-white/20", { type: "button", text: "Code Mode" });
-    codeMode.addEventListener("click", () => context.launchApp("editor", { path }));
+    bindButtonAction(codeMode, () => context.launchApp("editor", { path }));
     append(root, [append(el("header", "flex items-center justify-between gap-3 border-b border-white/10 p-4"), [append(el("div", "flex min-w-0 items-center gap-3"), [icon(node?.icon ?? "ph-file", "text-3xl text-cyan-200"), append(el("div", "min-w-0"), [el("h2", "truncate text-lg font-bold", { text: node?.name ?? "No Selection" }), el("p", "truncate font-mono text-xs text-white/45", { text: node?.path ?? path })])]), codeMode])]);
     const body = el("div", "overflow-auto p-5");
     if (node?.href) body.append(el("iframe", "h-full min-h-[360px] w-full rounded-2xl border border-white/10 bg-white", { src: node.href, title: node.name }));

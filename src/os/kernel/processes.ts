@@ -97,7 +97,20 @@ export function restoreProcess(id: string) {
 export function toggleMaximizeProcess(id: string) {
   const process = processes.get().find((item) => item.id === id);
   if (!process) return;
-  updateProcess(id, { maximized: !process.maximized });
+  if (process.maximized) {
+    const app = appRegistry[process.appId];
+    const width = Math.min(app.defaultSize.width, Math.max(320, window.innerWidth - 96));
+    const height = Math.min(app.defaultSize.height, Math.max(240, window.innerHeight - 120));
+    updateProcess(id, {
+      maximized: false,
+      width,
+      height,
+      x: Math.max(24, Math.round((window.innerWidth - width) / 2)),
+      y: Math.max(56, Math.round((window.innerHeight - height) / 2))
+    });
+  } else {
+    updateProcess(id, { maximized: true });
+  }
   focusProcess(id);
 }
 

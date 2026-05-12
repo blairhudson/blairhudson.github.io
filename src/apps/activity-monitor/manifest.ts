@@ -48,7 +48,6 @@ export const activityMonitorManifest: AppManifest = {
           render();
         });
         quit.addEventListener("pointerdown", (event) => event.stopPropagation());
-        quit.addEventListener("click", (event) => event.stopPropagation());
         append(row, [
           el("span", "font-mono text-xs", { text: process.id }),
           append(el("span", "truncate font-semibold"), [icon(process.icon, "mr-2 inline text-lg text-cyan-200"), process.title]),

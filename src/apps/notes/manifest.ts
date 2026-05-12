@@ -1,4 +1,4 @@
-import { append, button, el, subtleButton } from "../../os/kernel/dom";
+import { append, bindButtonAction, button, el, subtleButton } from "../../os/kernel/dom";
 import { createNode, findNode, FS_CHANGED_EVENT, listChildren, writeDocument } from "../../os/kernel/filesystem";
 import type { AppManifest } from "../../os/kernel/types";
 
@@ -26,7 +26,7 @@ export const notesManifest: AppManifest = {
       list.replaceChildren();
       listChildren(notesPath).filter((node) => node.type === "document").forEach((node) => {
         const row = el("button", `${subtleButton} ${node.path === current ? "border-cyan-200/40 bg-cyan-300/10" : ""}`, { type: "button", text: node.name });
-        row.addEventListener("click", () => { current = node.path; load(); renderList(); });
+        bindButtonAction(row, () => { current = node.path; load(); renderList(); });
         list.append(row);
       });
     };

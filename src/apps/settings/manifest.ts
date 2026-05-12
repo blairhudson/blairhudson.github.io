@@ -1,4 +1,4 @@
-import { append, button, el, subtleButton } from "../../os/kernel/dom";
+import { append, bindButtonAction, button, el, subtleButton } from "../../os/kernel/dom";
 import { settings, updateSettings, type OsSettings } from "../../os/kernel/settings";
 import type { AppManifest } from "../../os/kernel/types";
 
@@ -32,7 +32,7 @@ export const settingsManifest: AppManifest = {
         row.classList.toggle("bg-cyan-300/10", active);
         state.textContent = active ? "selected" : String(value);
       };
-      row.addEventListener("click", () => updateSettings({ [key]: value }));
+      bindButtonAction(row, () => updateSettings({ [key]: value }));
       settings.subscribe(render);
       append(row, [paint, append(el("span", "flex items-center justify-between gap-2"), [text, state])]);
       render();
@@ -48,7 +48,7 @@ export const settingsManifest: AppManifest = {
         row.classList.toggle("border-cyan-300/50", value);
         row.classList.toggle("bg-cyan-300/10", value);
       };
-      row.addEventListener("click", () => updateSettings({ [key]: !settings.get()[key] }));
+      bindButtonAction(row, () => updateSettings({ [key]: !settings.get()[key] }));
       settings.subscribe(render);
       append(row, [append(el("span"), [el("span", "block font-semibold", { text: label }), el("span", "block text-xs text-white/45", { text: description })]), state]);
       render();

@@ -64,6 +64,22 @@ a {
   background: transparent !important;
 }
 
+.blairos-window {
+  transition:
+    left 160ms cubic-bezier(.2, .8, .2, 1),
+    top 160ms cubic-bezier(.2, .8, .2, 1),
+    width 160ms cubic-bezier(.2, .8, .2, 1),
+    height 160ms cubic-bezier(.2, .8, .2, 1),
+    opacity 140ms ease,
+    filter 140ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blairos-window {
+    transition: none;
+  }
+}
+
 @media (max-width: 720px) {
   :root {
     --menu-height: 42px;

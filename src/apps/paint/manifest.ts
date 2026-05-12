@@ -1,4 +1,4 @@
-import { append, button, el } from "../../os/kernel/dom";
+import { append, bindButtonAction, button, el } from "../../os/kernel/dom";
 import type { AppManifest } from "../../os/kernel/types";
 
 export const paintManifest: AppManifest = {
@@ -35,7 +35,7 @@ export const paintManifest: AppManifest = {
     ["#67e8f9", "#f472b6", "#facc15", "#4ade80", "#111827"].forEach((swatch) => {
       const item = el("button", "h-8 w-8 rounded-full border border-white/25", { type: "button", title: swatch }) as HTMLButtonElement;
       item.style.background = swatch;
-      item.addEventListener("click", () => (color = swatch));
+      bindButtonAction(item, () => (color = swatch));
       toolbar.append(item);
     });
     toolbar.append(button("rounded-2xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20", "Clear", () => ctx?.clearRect(0, 0, canvas.width, canvas.height)));

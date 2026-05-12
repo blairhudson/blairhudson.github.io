@@ -26,11 +26,37 @@ export function append(parent: HTMLElement, children: Array<HTMLElement | string
   return parent;
 }
 
+export function bindButtonAction<T extends HTMLElement>(node: T, onClick: (event: Event) => void) {
+  let skipSyntheticClick = false;
+  node.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "mouse") event.stopPropagation();
+  });
+  node.addEventListener("pointerup", (event) => {
+    if (event.pointerType === "mouse" || !event.isPrimary) return;
+    if (!node.contains(document.elementFromPoint(event.clientX, event.clientY))) return;
+    event.preventDefault();
+    event.stopPropagation();
+    skipSyntheticClick = true;
+    onClick(event);
+    window.setTimeout(() => {
+      skipSyntheticClick = false;
+    });
+  });
+  node.addEventListener("click", (event) => {
+    if (skipSyntheticClick) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    onClick(event);
+  });
+  return node;
+}
+
 export function button(className: string, label: string, onClick: () => void) {
   const node = el("button", className, { type: "button" });
   node.textContent = label;
-  node.addEventListener("click", onClick);
-  return node;
+  return bindButtonAction(node, onClick);
 }
 
 export const glass = "border border-white/15 bg-slate-950/55 shadow-2xl shadow-black/40 backdrop-blur-2xl";

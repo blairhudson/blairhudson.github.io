@@ -1,4 +1,4 @@
-import { append, button, el, subtleButton } from "../../os/kernel/dom";
+import { append, bindButtonAction, button, el, subtleButton } from "../../os/kernel/dom";
 import type { AppManifest } from "../../os/kernel/types";
 
 type MailMessage = {
@@ -223,7 +223,7 @@ export const mailManifest: AppManifest = {
           el("span", `mt-1 block truncate ${message.unread ? "font-black" : "font-bold"}`, { text: `${message.flagged ? "★ " : ""}${message.subject}` }),
           el("span", "mt-1 line-clamp-2 text-xs text-white/45", { text: message.preview })
         ]);
-        row.addEventListener("click", () => open(message));
+        bindButtonAction(row, () => open(message));
         rows.append(row);
       });
       const selected = filtered.find((message) => message.id === selectedId) ?? filtered[0];

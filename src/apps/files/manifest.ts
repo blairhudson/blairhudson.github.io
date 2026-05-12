@@ -1,9 +1,13 @@
 import { duplicateNode, findNode, FS_CHANGED_EVENT, listChildren, moveNode, normalizePath, removeNode, renameNode, restoreNode } from "../../os/kernel/filesystem";
 import { metadataFor, setComment, setTags, toggleFavorite } from "../../os/kernel/metadata";
-import { append, el, icon, subtleButton } from "../../os/kernel/dom";
+import { append, bindButtonAction, el, icon, subtleButton } from "../../os/kernel/dom";
 import type { AppManifest } from "../../os/kernel/types";
 
 const sidebarPaths = ["/Desktop", "/Home/blair", "/Applications", "/Projects", "/Writing", "/Research", "/bin", "/Trash"];
+
+function isSmallScreen() {
+  return window.matchMedia("(max-width: 720px)").matches;
+}
 
 export const filesManifest: AppManifest = {
   id: "files",
@@ -35,7 +39,7 @@ export const filesManifest: AppManifest = {
         if (!node) return;
         const item = el("button", `${subtleButton} mb-2 flex w-full items-center gap-2 ${path === sidebarPath ? "border-cyan-300/40 bg-cyan-300/15" : ""}`, { type: "button" });
         append(item, [icon(node.icon, "text-xl text-cyan-200"), el("span", "truncate", { text: node.name })]);
-        item.addEventListener("click", () => openPath(sidebarPath));
+        bindButtonAction(item, () => openPath(sidebarPath));
         sidebar.append(item);
       });
     }
@@ -49,14 +53,17 @@ export const filesManifest: AppManifest = {
         el("div", "font-mono text-sm text-cyan-100", { text: path }),
         el("button", subtleButton, { type: "button", text: "Up" })
       ]);
-      (header.lastElementChild as HTMLButtonElement).addEventListener("click", () => openPath(`${path}/..`));
+      bindButtonAction(header.lastElementChild as HTMLButtonElement, () => openPath(`${path}/..`));
       main.append(header);
 
       const toolbar = el("div", "mb-4 flex flex-wrap gap-2");
       const selected = () => (selectedPath ? findNode(selectedPath) : undefined);
       const action = (label: string, fn: () => void) => {
-        const item = el("button", "rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/20", { type: "button", text: label });
-        item.addEventListener("click", fn);
+        const item = el("button", "rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/20 max-sm:min-h-11 max-sm:px-3.5", { type: "button", text: label });
+        bindButtonAction(item, (event) => {
+          event.stopPropagation();
+          fn();
+        });
         toolbar.append(item);
       };
       action("Open", () => { const node = selected(); if (node) context.openNode(node); });
@@ -106,14 +113,14 @@ export const filesManifest: AppManifest = {
       listChildren(path).forEach((child) => {
         const item = el("button", "grid min-h-28 content-start justify-items-center gap-2 rounded-3xl border border-transparent p-3 text-center transition hover:border-white/15 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-300/40", { type: "button" });
         item.dataset.fsPath = child.path;
-        item.draggable = true;
+        item.draggable = !isSmallScreen();
         const meta = metadataFor(child.path);
         append(item, [icon(child.icon, "text-4xl text-cyan-100"), el("span", "break-words text-xs leading-4 text-white/75", { text: `${meta.favorite ? "* " : ""}${child.name}` }), el("span", "min-h-4 text-[0.65rem] text-cyan-100/45", { text: meta.tags?.slice(0, 2).join(" #") ?? "" })]);
         item.addEventListener("dblclick", () => context.openNode(child));
-        item.addEventListener("click", () => {
+        bindButtonAction(item, () => {
           selectItem(item, child.path);
           if (child.type === "folder" || child.type === "trash") openPath(child.path);
-          else if (child.type === "app") context.openNode(child);
+          else if (isSmallScreen() || child.type === "app") context.openNode(child);
         });
         item.addEventListener("contextmenu", (event) => { event.preventDefault(); selectedPath = child.path; render(); });
         item.addEventListener("dragstart", (event) => event.dataTransfer?.setData("text/plain", child.path));

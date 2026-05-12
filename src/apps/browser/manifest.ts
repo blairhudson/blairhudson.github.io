@@ -1,6 +1,6 @@
 import { bookmarks } from "../../os/data/bookmarks";
 import { links } from "../../os/data/links";
-import { append, el, icon, subtleButton } from "../../os/kernel/dom";
+import { append, bindButtonAction, el, icon, subtleButton } from "../../os/kernel/dom";
 import type { AppManifest } from "../../os/kernel/types";
 
 function normalizeBrowserUrl(value: string) {
@@ -144,7 +144,7 @@ export const browserManifest: AppManifest = {
           el("p", "mx-auto max-w-xl text-white/65", { text: "There is no password prompt because Blair is already root. The machine just likes ceremony." }),
           el("button", `${subtleButton} mx-auto`, { type: "button", text: "Open secret note" })
         ]);
-        (page.lastElementChild as HTMLButtonElement).addEventListener("click", () => context.launchApp("preview", { path: "/System/.secrets/README.md" }));
+        bindButtonAction(page.lastElementChild as HTMLButtonElement, () => context.launchApp("preview", { path: "/System/.secrets/README.md" }));
         return page;
       }
       const note = notes[host];
@@ -156,7 +156,7 @@ export const browserManifest: AppManifest = {
         ]);
         if (note.path) {
           const openNote = el("button", `${subtleButton} mx-auto`, { type: "button", text: "Open field note" });
-          openNote.addEventListener("click", () => context.launchApp("preview", { path: note.path }));
+          bindButtonAction(openNote, () => context.launchApp("preview", { path: note.path }));
           page.append(openNote);
         }
         return page;
@@ -198,7 +198,7 @@ export const browserManifest: AppManifest = {
         bookmarks.forEach((bookmark) => {
           const item = el("button", `${subtleButton} grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)] gap-3 max-sm:grid-cols-1`, { type: "button" });
           append(item, [el("span", "min-w-0 truncate font-semibold", { text: bookmark.title }), el("span", "min-w-0 truncate font-mono text-xs text-white/40", { text: bookmark.url.replace(/^https?:\/\//, "") })]);
-          item.addEventListener("click", () => navigate(bookmark.url));
+          bindButtonAction(item, () => navigate(bookmark.url));
           bookmarkList.append(item);
         });
         append(grid, [hero, bookmarkList]);
@@ -257,22 +257,22 @@ export const browserManifest: AppManifest = {
       content.append(el("p", "p-5 font-mono text-sm text-white/55", { text: `cannot resolve ${url}` }));
     }
 
-    back.addEventListener("click", () => {
+    bindButtonAction(back, () => {
       if (historyIndex <= 0) return;
       historyIndex -= 1;
       renderPage(history[historyIndex]);
     });
-    forward.addEventListener("click", () => {
+    bindButtonAction(forward, () => {
       if (historyIndex >= history.length - 1) return;
       historyIndex += 1;
       renderPage(history[historyIndex]);
     });
-    reload.addEventListener("click", () => {
+    bindButtonAction(reload, () => {
       if (currentFrame) currentFrame.src = currentFrame.src;
       else renderPage(currentUrl);
     });
-    home.addEventListener("click", () => navigate("blairos://home"));
-    go.addEventListener("click", () => navigate(input.value));
+    bindButtonAction(home, () => navigate("blairos://home"));
+    bindButtonAction(go, () => navigate(input.value));
     input.addEventListener("keydown", (event) => {
       if (event.key === "Enter") navigate(input.value);
     });

@@ -1,5 +1,5 @@
 import { findNode, FS_CHANGED_EVENT, writeDocument } from "../../os/kernel/filesystem";
-import { append, el, icon, subtleButton } from "../../os/kernel/dom";
+import { append, bindButtonAction, el, icon, subtleButton } from "../../os/kernel/dom";
 import type { AppManifest } from "../../os/kernel/types";
 
 export const editorManifest: AppManifest = {
@@ -40,7 +40,7 @@ export const editorManifest: AppManifest = {
       status.textContent = `${path}${dirty ? " - edited" : ""}`;
     }
 
-    save.addEventListener("click", () => {
+    bindButtonAction(save, () => {
       const error = writeDocument(path, textarea.value);
       if (error) context.notify(`Text Editor: ${error}`);
       else {
@@ -49,7 +49,7 @@ export const editorManifest: AppManifest = {
         context.notify(`Saved ${path}`);
       }
     });
-    revert.addEventListener("click", load);
+    bindButtonAction(revert, load);
     textarea.addEventListener("input", updateDirty);
     window.addEventListener(FS_CHANGED_EVENT, () => {
       if (textarea.value === savedBody) load();

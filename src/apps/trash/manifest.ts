@@ -1,5 +1,5 @@
 import { emptyTrash, findNode, FS_CHANGED_EVENT, restoreNode } from "../../os/kernel/filesystem";
-import { append, el, icon, subtleButton } from "../../os/kernel/dom";
+import { append, bindButtonAction, el, icon, subtleButton } from "../../os/kernel/dom";
 import type { AppManifest } from "../../os/kernel/types";
 
 export const trashManifest: AppManifest = {
@@ -10,8 +10,15 @@ export const trashManifest: AppManifest = {
   render: (context) => {
     const root = el("section", "grid h-full grid-rows-[auto_1fr] gap-4 p-5 text-white");
     const header = el("div", "flex flex-wrap items-center justify-between gap-3 rounded-[28px] border border-white/15 bg-white/10 p-4");
-    const empty = el("button", "rounded-full bg-red-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-red-300", { type: "button", text: "Empty Trash" });
+    const empty = el("button", "rounded-full bg-red-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-red-300 max-sm:min-h-11 max-sm:px-5", { type: "button", text: "Empty Trash" });
     const list = el("div", "grid content-start gap-2 overflow-auto");
+
+    function bindAction(button: HTMLButtonElement, action: () => void) {
+      bindButtonAction(button, (event) => {
+        event.stopPropagation();
+        action();
+      });
+    }
 
     function render() {
       const items = [...(findNode("/Trash")?.children ?? [])];
@@ -21,12 +28,13 @@ export const trashManifest: AppManifest = {
         return;
       }
       items.forEach((item) => {
-        const row = el("div", "grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-3xl border border-white/10 bg-black/20 p-3");
-        const restore = el("button", subtleButton, { type: "button", text: "Restore" });
-        restore.addEventListener("click", () => {
+        const row = el("div", "grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-3xl border border-white/10 bg-black/20 p-3 max-sm:grid-cols-[auto_1fr] max-sm:[&>button]:col-span-2");
+        const restore = el("button", `${subtleButton} max-sm:min-h-11`, { type: "button", text: "Restore" });
+        bindAction(restore, () => {
           const restoredPath = restoreNode(item.path);
           if (restoredPath.startsWith("/") && findNode(restoredPath)) context.notify(`${item.name} restored to ${restoredPath}`);
           else context.notify(`Restore failed: ${restoredPath}`);
+          render();
         });
         append(row, [
           icon(item.icon, "text-2xl text-red-200"),
@@ -37,9 +45,10 @@ export const trashManifest: AppManifest = {
       });
     }
 
-    empty.addEventListener("click", () => {
+    bindAction(empty, () => {
       const error = emptyTrash();
       context.notify(error ? `Empty Trash failed: ${error}` : "Trash emptied");
+      render();
     });
     window.addEventListener(FS_CHANGED_EVENT, render);
     append(header, [el("div", "font-bold", { text: "Deleted artifacts" }), empty]);
