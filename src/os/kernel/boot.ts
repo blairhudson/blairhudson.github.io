@@ -461,6 +461,13 @@ function appContext(process: ProcessRecord): AppContext {
   };
 }
 
+function positionOpenRemoteBrowser() {
+  const process = processes.get().at(-1);
+  if (process?.appId !== "browser") return;
+  const inset = isSmallScreen() ? 6 : 120;
+  updateProcess(process.id, { x: Math.max(isSmallScreen() ? 6 : 24, window.innerWidth - process.width - inset) });
+}
+
 function restoreOrLaunchSession() {
   if (restoreSession()) return "restored saved windows and focus state";
   launchApp("browser", { url: "https://blairhudson.com/agile-weekend/" });
@@ -471,7 +478,9 @@ function restoreOrLaunchSession() {
     updateProcess(browserProcess.id, { x: Math.max(24, window.innerWidth - browserProcess.width - 40), y: 72 });
   }
   launchApp("files", { path: "/Home/blair/Links" });
-  return "no saved session, launched Browser, Terminal, and Links";
+  launchApp("browser", { url: "https://openremote.blairhudson.com" });
+  positionOpenRemoteBrowser();
+  return "no saved session, launched Browser, Terminal, Links, and OpenRemote";
 }
 
 function legacyRestoreOrLaunchSession() {
@@ -484,6 +493,8 @@ function legacyRestoreOrLaunchSession() {
       updateProcess(browserProcess.id, { x: Math.max(24, window.innerWidth - browserProcess.width - 40), y: 72 });
     }
     launchApp("files", { path: "/Home/blair/Links" });
+    launchApp("browser", { url: "https://openremote.blairhudson.com" });
+    positionOpenRemoteBrowser();
   }
 }
 

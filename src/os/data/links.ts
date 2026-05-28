@@ -22,6 +22,13 @@ export const links: LinkItem[] = [
     tags: ["agents", "sandbox", "sdk"]
   },
   {
+    key: "openremote",
+    label: "OpenRemote",
+    subtitle: "Control desktop coding sessions from your phone.",
+    href: "https://openremote.blairhudson.com",
+    tags: ["coding", "remote", "phone"]
+  },
+  {
     key: "agile-weekend",
     label: "Agile Weekend",
     subtitle: "Plan a weekend project, track what happened, share the outcome.",
@@ -99,6 +106,8 @@ for (const [alias, key] of Object.entries({
   sbxa: "sbx-agents",
   "coding-agents": "sbx-agents",
   "sandbox-agents": "sbx-agents",
+  "open-remote": "openremote",
+  remote: "openremote",
   agile: "agile-weekend",
   weekend: "agile-weekend",
   skillcraft: "skillcraft",
