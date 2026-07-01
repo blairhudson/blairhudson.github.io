@@ -15,6 +15,13 @@ export const links: LinkItem[] = [
     tags: ["hardware", "opencode", "github"]
   },
   {
+    key: "defensive-tool-design",
+    label: "Defensive Tool Design",
+    subtitle: "The key to building better AI agents.",
+    href: "https://defensivetool.design/",
+    tags: ["agents", "tools", "book"]
+  },
+  {
     key: "sbx-agents",
     label: "sbx-agents",
     subtitle: "Coding agents in sandboxes.",
@@ -27,6 +34,13 @@ export const links: LinkItem[] = [
     subtitle: "Control desktop coding sessions from your phone.",
     href: "https://openremote.blairhudson.com",
     tags: ["coding", "remote", "phone"]
+  },
+  {
+    key: "foreman",
+    label: "Foreman",
+    subtitle: "Agent skill for building safer tools.",
+    href: "https://defensivetool.design/foreman/",
+    tags: ["agents", "skills", "tools"]
   },
   {
     key: "agile-weekend",
@@ -102,12 +116,18 @@ for (const link of links) {
 }
 
 for (const [alias, key] of Object.entries({
+  dtd: "defensive-tool-design",
+  book: "defensive-tool-design",
+  "defensive-tool-design": "defensive-tool-design",
+  "tool-design": "defensive-tool-design",
   sbx: "sbx-agents",
   sbxa: "sbx-agents",
   "coding-agents": "sbx-agents",
   "sandbox-agents": "sbx-agents",
   "open-remote": "openremote",
   remote: "openremote",
+  foreman: "foreman",
+  "safer-tools": "foreman",
   agile: "agile-weekend",
   weekend: "agile-weekend",
   skillcraft: "skillcraft",

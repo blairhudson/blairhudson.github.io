@@ -470,31 +470,31 @@ function positionOpenRemoteBrowser() {
 
 function restoreOrLaunchSession() {
   if (restoreSession()) return "restored saved windows and focus state";
-  launchApp("browser", { url: "https://blairhudson.com/agile-weekend/" });
   launchApp("terminal");
-  launchApp("browser", { url: "https://blairhudson.com/sbx-agents/" });
+  launchApp("files", { path: "/Home/blair/Links" });
+  launchApp("browser", { url: "https://openremote.blairhudson.com" });
+  positionOpenRemoteBrowser();
+  launchApp("browser", { url: "https://defensivetool.design/" });
+  launchApp("browser", { url: "https://defensivetool.design/foreman/" });
   const browserProcess = processes.get().at(-1);
   if (browserProcess?.appId === "browser") {
     updateProcess(browserProcess.id, { x: Math.max(24, window.innerWidth - browserProcess.width - 40), y: 72 });
   }
-  launchApp("files", { path: "/Home/blair/Links" });
-  launchApp("browser", { url: "https://openremote.blairhudson.com" });
-  positionOpenRemoteBrowser();
-  return "no saved session, launched Browser, Terminal, Links, and OpenRemote";
+  return "no saved session, launched Terminal, Links, OpenRemote, and front project browsers";
 }
 
 function legacyRestoreOrLaunchSession() {
   if (!restoreSession()) {
-    launchApp("browser", { url: "https://blairhudson.com/agile-weekend/" });
     launchApp("terminal");
-    launchApp("browser", { url: "https://blairhudson.com/sbx-agents/" });
+    launchApp("files", { path: "/Home/blair/Links" });
+    launchApp("browser", { url: "https://openremote.blairhudson.com" });
+    positionOpenRemoteBrowser();
+    launchApp("browser", { url: "https://defensivetool.design/" });
+    launchApp("browser", { url: "https://defensivetool.design/foreman/" });
     const browserProcess = processes.get().at(-1);
     if (browserProcess?.appId === "browser") {
       updateProcess(browserProcess.id, { x: Math.max(24, window.innerWidth - browserProcess.width - 40), y: 72 });
     }
-    launchApp("files", { path: "/Home/blair/Links" });
-    launchApp("browser", { url: "https://openremote.blairhudson.com" });
-    positionOpenRemoteBrowser();
   }
 }
 

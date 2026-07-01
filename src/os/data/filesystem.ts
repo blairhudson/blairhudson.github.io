@@ -97,9 +97,9 @@ AI and software engineering leader building enterprise-scale generative AI, data
 - Artificial intelligence-based workforce management systems, methods, and media.`
         },
         {
-          id: "desktop-agile-run-sheet",
-          name: "Agile Weekend Run Sheet.sheet",
-          path: "/Desktop/Agile Weekend Run Sheet.sheet",
+          id: "desktop-defensive-tool-design-run-sheet",
+          name: "Defensive Tool Design Run Sheet.sheet",
+          path: "/Desktop/Defensive Tool Design Run Sheet.sheet",
           type: "document",
           icon: "ph-table",
           body: JSON.stringify({
@@ -111,16 +111,16 @@ AI and software engineering leader building enterprise-scale generative AI, data
               B1: "Task",
               C1: "Points",
               D1: "Done",
-              A2: "Friday",
-              B2: "Sketch app loop",
+              A2: "Book",
+              B2: "Refine defensive design model",
               C2: "3",
               D2: "yes",
-              A3: "Saturday",
-              B3: "Build working demo",
+              A3: "Foreman",
+              B3: "Build safer tool workflow",
               C3: "8",
               D3: "yes",
-              A4: "Sunday",
-              B4: "Write proof note",
+              A4: "Launch",
+              B4: "Publish proof note",
               C4: "5",
               D4: "next",
               B6: "Total points",
@@ -172,14 +172,14 @@ AI and software engineering leader building enterprise-scale generative AI, data
                       B2: "shipping",
                       C2: "9",
                       D2: "add Sheets.app",
-                      A3: "Agile Weekend",
+                      A3: "Defensive Tool Design",
                       B3: "live",
                       C3: "8",
-                      D3: "capture run sheet",
-                      A4: "SBX Agents",
+                      D3: "publish book link",
+                      A4: "Foreman",
                       B4: "active",
                       C4: "10",
-                      D4: "publish proof",
+                      D4: "ship safer tool skill",
                       B6: "Average",
                       C6: "=AVG(C2:C4)",
                       B7: "Total",
@@ -210,7 +210,7 @@ AI and software engineering leader building enterprise-scale generative AI, data
                   path: "/Home/blair/Code/hello.js",
                   type: "document",
                   icon: "ph-file-js",
-                  body: "const projects = ['sbx-agents', 'agile-weekend', 'skillcraft'];\n\nconsole.log('BlairOS Code running JS');\nconsole.log(projects.map((name) => name.toUpperCase()).join(' / '));\n\nreturn { ok: true, count: projects.length };\n"
+                  body: "const projects = ['defensive-tool-design', 'foreman', 'skillcraft'];\n\nconsole.log('BlairOS Code running JS');\nconsole.log(projects.map((name) => name.toUpperCase()).join(' / '));\n\nreturn { ok: true, count: projects.length };\n"
                 }
               ]
             },
@@ -340,20 +340,20 @@ AI and software engineering leader building enterprise-scale generative AI, data
       icon: "ph-cube",
       children: [
         {
-          id: "project-sbx",
-          name: "sbx-agents.project",
-          path: "/Projects/sbx-agents.project",
+          id: "project-defensive-tool-design",
+          name: "defensive-tool-design.project",
+          path: "/Projects/defensive-tool-design.project",
           type: "document",
-          icon: "ph-cpu",
-          body: "Sandboxed coding-agent SDK across Docker SBX, Docker, and custom execution environments."
+          icon: "ph-shield-check",
+          body: "Defensive Tool Design: The Key to Building Better AI Agents."
         },
         {
-          id: "project-agile-weekend",
-          name: "agile-weekend.project",
-          path: "/Projects/agile-weekend.project",
+          id: "project-foreman",
+          name: "foreman.project",
+          path: "/Projects/foreman.project",
           type: "document",
-          icon: "ph-calendar-check",
-          body: "Weekend project planner with outcome capture and shareable updates."
+          icon: "ph-hammer",
+          body: "Foreman: agent skill for building safer tools."
         }
       ]
     },

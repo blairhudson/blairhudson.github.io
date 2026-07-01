@@ -6,11 +6,11 @@ import { appManifests } from "../../os/kernel/apps";
 import { createNode, findNode, flattenFs, normalizePath, writeDocument } from "../../os/kernel/filesystem";
 
 const seededHistory = [
-  "open sbx",
+  "open dtd",
   "fortune",
   "matrix",
   "env | grep OPENAI",
-  "curl https://blairhudson.com/sbx-agents/"
+  "curl https://defensivetool.design/foreman/"
 ];
 
 type NanoSession = {
