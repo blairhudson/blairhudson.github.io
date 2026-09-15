@@ -22,6 +22,13 @@ export const links: LinkItem[] = [
     tags: ["agents", "tools", "book"]
   },
   {
+    key: "iwantthathat",
+    label: "I Want That Hat",
+    subtitle: "A personal review of the best hats in AI.",
+    href: "https://iwantthathat.com",
+    tags: ["hats", "ai", "reviews"]
+  },
+  {
     key: "sbx-agents",
     label: "sbx-agents",
     subtitle: "Coding agents in sandboxes.",

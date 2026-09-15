@@ -475,7 +475,7 @@ function restoreOrLaunchSession() {
   launchApp("browser", { url: "https://openremote.blairhudson.com" });
   positionOpenRemoteBrowser();
   launchApp("browser", { url: "https://defensivetool.design/" });
-  launchApp("browser", { url: "https://defensivetool.design/foreman/" });
+  launchApp("browser", { url: "https://iwantthathat.com" });
   const browserProcess = processes.get().at(-1);
   if (browserProcess?.appId === "browser") {
     updateProcess(browserProcess.id, { x: Math.max(24, window.innerWidth - browserProcess.width - 40), y: 72 });
@@ -490,7 +490,7 @@ function legacyRestoreOrLaunchSession() {
     launchApp("browser", { url: "https://openremote.blairhudson.com" });
     positionOpenRemoteBrowser();
     launchApp("browser", { url: "https://defensivetool.design/" });
-    launchApp("browser", { url: "https://defensivetool.design/foreman/" });
+    launchApp("browser", { url: "https://iwantthathat.com" });
     const browserProcess = processes.get().at(-1);
     if (browserProcess?.appId === "browser") {
       updateProcess(browserProcess.id, { x: Math.max(24, window.innerWidth - browserProcess.width - 40), y: 72 });
