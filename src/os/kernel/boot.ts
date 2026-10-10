@@ -461,34 +461,23 @@ function appContext(process: ProcessRecord): AppContext {
   };
 }
 
-function positionOpenRemoteBrowser() {
-  const process = processes.get().at(-1);
-  if (process?.appId !== "browser") return;
-  const inset = isSmallScreen() ? 6 : 120;
-  updateProcess(process.id, { x: Math.max(isSmallScreen() ? 6 : 24, window.innerWidth - process.width - inset) });
-}
-
 function restoreOrLaunchSession() {
   if (restoreSession()) return "restored saved windows and focus state";
   launchApp("terminal");
   launchApp("files", { path: "/Home/blair/Links" });
-  launchApp("browser", { url: "https://openremote.blairhudson.com" });
-  positionOpenRemoteBrowser();
   launchApp("browser", { url: "https://defensivetool.design/" });
   launchApp("browser", { url: "https://iwantthathat.com" });
   const browserProcess = processes.get().at(-1);
   if (browserProcess?.appId === "browser") {
     updateProcess(browserProcess.id, { x: Math.max(24, window.innerWidth - browserProcess.width - 40), y: 72 });
   }
-  return "no saved session, launched Terminal, Links, OpenRemote, and front project browsers";
+  return "no saved session, launched Terminal, Links, and front project browsers";
 }
 
 function legacyRestoreOrLaunchSession() {
   if (!restoreSession()) {
     launchApp("terminal");
     launchApp("files", { path: "/Home/blair/Links" });
-    launchApp("browser", { url: "https://openremote.blairhudson.com" });
-    positionOpenRemoteBrowser();
     launchApp("browser", { url: "https://defensivetool.design/" });
     launchApp("browser", { url: "https://iwantthathat.com" });
     const browserProcess = processes.get().at(-1);
